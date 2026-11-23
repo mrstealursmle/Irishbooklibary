@@ -1,0 +1,3326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Curse of the Unloved: Part II — Written by Irish</title>
+
+  <!-- Literary Book Typography, Antique Foil Cover Serif & Signature Script -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=La+Belle+Aurore&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================================
+       1. Design Tokens, Viewport-Locked 5:8 Book Geometry & Reading Desk Themes
+       ========================================================================= */
+    :root {
+      /* Warm Dusky-Rosewood Literary Reading Desk (Default) */
+      --desk-bg: radial-gradient(circle at 50% 24%, #e5d8d3 0%, #cdbcb6 58%, #b29e98 100%);
+      --paper-cream: #f5efe6;
+      --ink-primary: #251d1b;
+      --ink-soft: #564a46;
+      --ink-muted: #82736e;
+      --crimson-ink: #7d192b;
+      --crimson-soft: #9c2b3e;
+      --gold-foil: #dfbf8a;
+      --gold-muted: #b8945e;
+      --book-shadow: 0 28px 66px rgba(34, 16, 20, 0.34), 0 10px 22px rgba(34, 16, 20, 0.20);
+      --ui-surface: rgba(247, 241, 236, 0.90);
+      --ui-border: rgba(105, 58, 66, 0.20);
+      --ui-text: #38272a;
+
+      /* Strict 5:8 Trade Book Ratio (Single Page / Front Cover / Back Cover)
+         Always clears top floating toolbar and bottom pagination pill cleanly */
+      --page-h: min(calc(100vh - 156px), calc(92vw / 0.625), 680px);
+      --page-h: min(calc(100dvh - 156px), calc(92vw / 0.625), 680px);
+      --page-w: calc(var(--page-h) * 0.625);
+    }
+
+    /* Desktop Two-Page Open Spread Sizing (> 900px) */
+    @media (min-width: 901px) {
+      .book-stage.is-spread {
+        --page-h: min(calc(100vh - 156px), calc(92vw / 1.25), 660px);
+        --page-h: min(calc(100dvh - 156px), calc(92vw / 1.25), 660px);
+        --page-w: calc(var(--page-h) * 0.625);
+      }
+    }
+
+    /* Candlelit Midnight Velvet Reading Mode */
+    body.night-mode {
+      --desk-bg: radial-gradient(circle at 50% 22%, #2b141a 0%, #190b0f 62%, #0e0508 100%);
+      --ui-surface: rgba(33, 15, 20, 0.90);
+      --ui-border: rgba(223, 191, 138, 0.22);
+      --ui-text: #eee1d6;
+      --book-shadow: 0 34px 80px rgba(0, 0, 0, 0.72), 0 12px 28px rgba(0, 0, 0, 0.50);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: 'EB Garamond', Georgia, serif;
+      background: var(--desk-bg);
+      color: var(--ink-primary);
+      overflow-x: hidden;
+      transition: background 0.45s ease;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle tactile desk weave pattern */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(68, 30, 36, 0.04) 1px, transparent 0);
+      background-size: 24px 24px;
+      z-index: 0;
+    }
+
+    /* Subtle Slow-Drifting Candlelit Gold Dust & Warm Ash Embers Layer */
+    #emberCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* =========================================================================
+       2. Floating Top Frosted-Glass Reading Toolbar
+       ========================================================================= */
+    .toolbar {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--ui-surface);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--ui-border);
+      box-shadow: 0 8px 26px rgba(34, 16, 20, 0.14);
+      max-width: calc(100vw - 20px);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .toolbar::-webkit-scrollbar { display: none; }
+
+    .tool-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--ui-text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 6px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tool-btn:hover { background: rgba(125, 25, 43, 0.12); }
+    .tool-btn.active { background: var(--crimson-ink); color: #f8f1eb; }
+    .tool-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+    .tool-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--ui-border);
+      flex-shrink: 0;
+      margin: 0 2px;
+    }
+
+    @media (max-width: 900px) {
+      #btnViewMode { display: none; }
+    }
+
+    /* =========================================================================
+       3. Main Physical Book Stage (Guaranteed Clear of Toolbar & Bottom Pill)
+       ========================================================================= */
+    .stage {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 72px 16px 78px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .book-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 2000px;
+      max-width: 100%;
+    }
+
+    .book-stage {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      border-radius: 4px;
+      box-shadow: var(--book-shadow);
+      transition: opacity 0.22s ease, transform 0.24s ease;
+    }
+    .book-stage.turning-next { opacity: 0.36; transform: translateX(-14px) scale(0.992); }
+    .book-stage.turning-prev { opacity: 0.36; transform: translateX(14px) scale(0.992); }
+
+    /* Locked 5:8 Book Page Container — Zero Aspect Distortion */
+    .book-page {
+      position: relative;
+      width: var(--page-w);
+      height: var(--page-h);
+      flex: 0 0 auto;
+      background: var(--paper-cream);
+      overflow: hidden;
+      user-select: text;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Archival Cream Paper Grain SVG Overlay */
+    .book-page::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.34;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.14'/%3E%3C/svg%3E");
+      z-index: 20;
+      mix-blend-mode: multiply;
+    }
+
+    /* Realistic Book Thickness, Inner Spine Shadows & Stacked Page Edges */
+    .book-page.single-page {
+      border-radius: 3px 10px 10px 3px;
+      box-shadow:
+        inset 16px 0 24px -16px rgba(45, 30, 26, 0.34),
+        inset 3px 0 6px -2px rgba(45, 30, 26, 0.24),
+        inset -2px 0 5px rgba(255, 255, 255, 0.45),
+        4px 0 0 -1px #ebe3d6, 7px 0 0 -2px #dfd6c7, 10px 0 0 -3px #d2c8b8, 13px 0 0 -4px #c7bcab;
+    }
+
+    .book-page.spread-left {
+      border-radius: 8px 0 0 8px;
+      box-shadow:
+        inset -28px 0 36px -18px rgba(42, 26, 22, 0.36),
+        inset -4px 0 8px -3px rgba(42, 26, 22, 0.26),
+        -4px 0 0 -1px #ebe3d6, -7px 0 0 -2px #ded5c6, -10px 0 0 -3px #cfc5b5;
+      border-right: 1px solid rgba(60, 40, 38, 0.16);
+    }
+
+    .book-page.spread-right {
+      border-radius: 0 8px 8px 0;
+      box-shadow:
+        inset 28px 0 36px -18px rgba(42, 26, 22, 0.34),
+        inset 4px 0 8px -3px rgba(42, 26, 22, 0.24),
+        4px 0 0 -1px #ebe3d6, 7px 0 0 -2px #ded5c6, 10px 0 0 -3px #cfc5b5;
+    }
+
+    /* Collector's Matte Velvet-Oxblood Linen Front & Back Covers */
+    .book-page.cover-front {
+      background:
+        radial-gradient(circle at 52% 44%, rgba(102, 18, 36, 0.40) 0%, rgba(30, 7, 14, 0.90) 60%, #18060b 100%),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.018) 0px, rgba(255, 255, 255, 0.018) 1px, transparent 1px, transparent 3px),
+        #18060b;
+      border-radius: 3px 10px 10px 3px;
+      box-shadow:
+        inset 14px 0 22px -10px rgba(0, 0, 0, 0.72),
+        inset 22px 0 2px -20px rgba(235, 206, 158, 0.28),
+        inset 24px 0 4px -21px rgba(0, 0, 0, 0.58),
+        inset -1px 0 3px rgba(235, 206, 158, 0.16),
+        5px 0 0 -1px #f0e8dc, 8px 0 0 -2px #e2d8ca, 11px 0 0 -3px #d5cabe, 14px 0 0 -4px #c7bba9;
+    }
+
+    .book-page.cover-back {
+      background:
+        radial-gradient(circle at 48% 46%, rgba(92, 16, 33, 0.36) 0%, rgba(28, 7, 13, 0.92) 62%, #18060b 100%),
+        repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.018) 0px, rgba(255, 255, 255, 0.018) 1px, transparent 1px, transparent 3px),
+        #18060b;
+      border-radius: 10px 3px 3px 10px;
+      box-shadow:
+        inset -14px 0 22px -10px rgba(0, 0, 0, 0.72),
+        inset -22px 0 2px -20px rgba(235, 206, 158, 0.28),
+        inset -24px 0 4px -21px rgba(0, 0, 0, 0.58),
+        inset 1px 0 3px rgba(235, 206, 158, 0.16),
+        -5px 0 0 -1px #f0e8dc, -8px 0 0 -2px #e2d8ca, -11px 0 0 -3px #d5cabe, -14px 0 0 -4px #c7bba9;
+    }
+
+    /* Matte Linen Cover Hinge Groove */
+    .cover-front::after, .cover-back::after {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 2px;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .cover-front::after {
+      left: 3.8%;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.55), rgba(232, 202, 156, 0.24));
+    }
+    .cover-back::after {
+      right: 3.8%;
+      background: linear-gradient(to left, rgba(0, 0, 0, 0.55), rgba(232, 202, 156, 0.24));
+    }
+
+    /* Embossed Shimmering Antique Gold Foil */
+    .foil-title {
+      background: linear-gradient(
+        135deg,
+        #b89158 0%,
+        #f7e2bc 30%,
+        #cfa668 54%,
+        #fff2d6 78%,
+        #9e753e 100%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.65));
+      animation: goldShift 11s ease-in-out infinite;
+    }
+
+    @keyframes goldShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* =========================================================================
+       4. Front Cover Full-Frame Layout (Doorway Engraving + Part II Gold Badge)
+       ========================================================================= */
+    .front-cover-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 6.0% 8% 5.4% 10%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.0%;
+      z-index: 5;
+      overflow: hidden;
+    }
+
+    /* Double Hairline Antique Gold Collector's Frame */
+    .cover-gold-border {
+      position: absolute;
+      inset: 3.6% 4.8% 3.6% 7%;
+      border: 1px solid rgba(223, 191, 138, 0.36);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .cover-gold-border::after {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border: 0.5px solid rgba(223, 191, 138, 0.18);
+    }
+    .cover-back .cover-gold-border {
+      inset: 3.6% 7% 3.6% 4.8%;
+    }
+
+    .cover-top-kicker {
+      flex: 0 0 auto;
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0132);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(223, 191, 138, 0.80);
+      text-align: center;
+      padding-top: 1.0%;
+      z-index: 8;
+    }
+
+    .cover-title-block {
+      flex: 0 0 auto;
+      width: 100%;
+      text-align: center;
+      z-index: 8;
+      padding: 0 2%;
+    }
+
+    .cover-title-serif {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0425);
+      line-height: 1.10;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .cover-title-line { display: block; }
+    .cover-title-line.is-connector {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      text-transform: lowercase;
+      font-size: 0.72em;
+      letter-spacing: 0.09em;
+      line-height: 0.94;
+      opacity: 0.94;
+      margin: calc(var(--page-h) * 0.002) 0;
+    }
+
+    /* Refined Antique Gold Foil "PART II" Badge Flanked by Delicate Hairline Rules */
+    .cover-part-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: calc(var(--page-h) * 0.015);
+      margin-top: calc(var(--page-h) * 0.011);
+    }
+    .cover-part-rule {
+      width: calc(var(--page-h) * 0.052);
+      height: 0.8px;
+      background: linear-gradient(to right, transparent, rgba(223, 191, 138, 0.75), rgba(223, 191, 138, 0.45));
+    }
+    .cover-part-rule.right {
+      background: linear-gradient(to left, transparent, rgba(223, 191, 138, 0.75), rgba(223, 191, 138, 0.45));
+    }
+    .cover-part-label {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0185);
+      font-weight: 500;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      padding-left: 0.34em;
+    }
+
+    .cover-subtitle-whisper {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: calc(var(--page-h) * 0.0182);
+      line-height: 1.40;
+      color: rgba(236, 214, 206, 0.82);
+      max-width: 88%;
+      margin: calc(var(--page-h) * 0.009) auto 0;
+    }
+
+    /* Hero Midnight Doorway & Table Lamp Engraving Container */
+    .cover-art-wrap {
+      position: relative;
+      flex: 1 1 0;
+      min-height: 0;
+      min-width: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5% 4%;
+      z-index: 6;
+    }
+
+    .cover-art-svg {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    /* Very Subtle Breathing Lamplight Warmth Pulse inside Cover Doorway */
+    .lamp-glow-pulse {
+      animation: lampBreath 7.5s ease-in-out infinite;
+      transform-origin: 140px 168px;
+    }
+    @keyframes lampBreath {
+      0%, 100% { opacity: 0.82; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+
+    .cover-author-block {
+      flex: 0 0 auto;
+      text-align: center;
+      z-index: 8;
+      padding-bottom: 0.8%;
+    }
+    .cover-gold-rule {
+      width: calc(var(--page-h) * 0.072);
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(223, 191, 138, 0.65), transparent);
+      margin: 0 auto calc(var(--page-h) * 0.010);
+    }
+    .cover-author {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0188);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #e9d1a6;
+      font-weight: 500;
+      line-height: 1.25;
+    }
+
+    /* =========================================================================
+       5. Back Cover Full-Frame Layout & Circular Book II Ex-Libris Seal
+       ========================================================================= */
+    .back-cover-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 7.0% 10.5% 5.6% 9.2%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 5;
+      color: #e9dbd4;
+      overflow: hidden;
+    }
+
+    .back-top-section {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .back-top-ornament {
+      display: flex;
+      justify-content: center;
+      margin-bottom: calc(var(--page-h) * 0.014);
+      opacity: 0.88;
+    }
+    .back-top-ornament svg {
+      height: calc(var(--page-h) * 0.032);
+      width: auto;
+      display: block;
+    }
+
+    .back-quote {
+      font-style: italic;
+      font-size: calc(var(--page-h) * 0.0220);
+      line-height: 1.52;
+      text-align: center;
+      color: #f3e4d7;
+      margin-bottom: calc(var(--page-h) * 0.016);
+    }
+
+    .back-divider {
+      width: calc(var(--page-h) * 0.068);
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(223, 191, 138, 0.55), transparent);
+      margin: 0 auto calc(var(--page-h) * 0.016);
+      flex-shrink: 0;
+    }
+
+    .back-blurb {
+      font-size: calc(var(--page-h) * 0.0178);
+      line-height: 1.55;
+      text-align: center;
+      color: rgba(231, 212, 204, 0.87);
+      margin-bottom: calc(var(--page-h) * 0.013);
+    }
+    .back-blurb:last-child { margin-bottom: 0; }
+
+    .back-bottom-section {
+      flex: 0 0 auto;
+      margin-top: calc(var(--page-h) * 0.012);
+    }
+
+    .back-author-note {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.0172);
+      line-height: 1.42;
+      text-align: center;
+      color: rgba(224, 201, 192, 0.84);
+      border-top: 1px solid rgba(223, 191, 138, 0.20);
+      padding-top: calc(var(--page-h) * 0.012);
+      margin-bottom: calc(var(--page-h) * 0.014);
+    }
+    .back-author-note strong {
+      font-family: 'Cinzel', Georgia, serif;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-size: 0.88em;
+      color: #e7cb9a;
+      display: block;
+      margin-bottom: calc(var(--page-h) * 0.004);
+    }
+
+    .back-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4%;
+    }
+
+    .back-manuscript-meta {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.0134);
+      line-height: 1.52;
+      color: rgba(220, 198, 189, 0.78);
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+    .back-manuscript-meta .ms-heading {
+      font-family: 'Cinzel', Georgia, serif;
+      font-weight: 500;
+      color: #e3c48f;
+      font-size: calc(var(--page-h) * 0.0138);
+      letter-spacing: 0.15em;
+      display: block;
+      margin-bottom: calc(var(--page-h) * 0.003);
+    }
+
+    .archival-seal-wrap {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.94;
+      transform: rotate(-5deg);
+    }
+    .archival-seal-svg {
+      width: calc(var(--page-h) * 0.126);
+      height: calc(var(--page-h) * 0.126);
+      display: block;
+    }
+
+    /* =========================================================================
+       6. Interior Archival Cream Pages, Asymmetric Gutters & Ghost Bleed-Through
+       ========================================================================= */
+    .page-inner {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      height: 100%;
+      padding: 7.8% 12.5% 6.8% 13.5%;
+      display: flex;
+      flex-direction: column;
+      color: var(--ink-primary);
+      overflow: hidden;
+    }
+
+    /* Asymmetric Perfect-Binding Gutter Margins (16.5% spine / 11.5% outer) */
+    .book-page.spread-left .page-inner,
+    .page-inner.verso-gutter {
+      padding-left: 11.5%;
+      padding-right: 16.5%;
+    }
+
+    .book-page.spread-right .page-inner,
+    .page-inner.recto-gutter {
+      padding-left: 16.5%;
+      padding-right: 11.5%;
+    }
+
+    /* Authentic Subtle Mirrored Ink Bleed-Through on Poem Pages */
+    .ghost-bleed {
+      position: absolute;
+      inset: 14% 15%;
+      transform: scaleX(-1);
+      opacity: 0.030;
+      color: #2b1a1c;
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.023);
+      line-height: 1.68;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      filter: blur(0.4px);
+      z-index: 1;
+      user-select: none;
+    }
+
+    /* Chicago-style Small-Caps Running Header */
+    .running-header {
+      position: relative;
+      z-index: 4;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.0140);
+      font-weight: 500;
+      letter-spacing: 0.19em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      opacity: 0.82;
+      text-align: center;
+      padding-bottom: calc(var(--page-h) * 0.012);
+      margin-bottom: calc(var(--page-h) * 0.004);
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-footer-num {
+      position: relative;
+      z-index: 4;
+      margin-top: auto;
+      text-align: center;
+      font-size: calc(var(--page-h) * 0.0172);
+      color: var(--ink-muted);
+      letter-spacing: 0.07em;
+      padding-top: calc(var(--page-h) * 0.012);
+      flex-shrink: 0;
+    }
+
+    /* Rich Warm Archival Endpapers */
+    .endpaper-inner {
+      background: linear-gradient(135deg, #ece3d7 0%, #e5d8cb 100%);
+      width: 100%;
+      height: 100%;
+    }
+
+    .half-title-wrap, .dedication-wrap, .part-opener-wrap {
+      position: relative;
+      z-index: 4;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-bottom: 8%;
+    }
+
+    .half-title-text {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0265);
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #362226;
+      line-height: 1.42;
+      max-width: 92%;
+    }
+
+    .full-title-wrap {
+      position: relative;
+      z-index: 4;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      padding: 9% 2% 4%;
+    }
+
+    .full-title-main {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0345);
+      line-height: 1.22;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #4f1420;
+      margin-bottom: calc(var(--page-h) * 0.014);
+    }
+
+    .full-title-sub {
+      font-style: italic;
+      font-size: calc(var(--page-h) * 0.0200);
+      color: var(--ink-soft);
+      max-width: 92%;
+      margin: 0 auto;
+      line-height: 1.48;
+    }
+
+    .full-title-sprig svg {
+      height: calc(var(--page-h) * 0.056);
+      width: auto;
+      display: block;
+    }
+
+    .full-title-author {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.022);
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #3a272a;
+    }
+
+    /* Private Written Mark at Foot of Title Page (No Publisher) */
+    .full-title-manuscript-mark {
+      font-family: 'Cormorant Garamond', serif;
+      text-align: center;
+      color: var(--ink-muted);
+      line-height: 1.55;
+      border-top: 1px solid rgba(125, 25, 43, 0.28);
+      padding-top: calc(var(--page-h) * 0.012);
+      width: 84%;
+    }
+    .full-title-manuscript-mark .ms-mark-top {
+      display: block;
+      font-size: calc(var(--page-h) * 0.0148);
+      font-weight: 600;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--crimson-ink);
+    }
+    .full-title-manuscript-mark .ms-mark-sub {
+      display: block;
+      font-size: calc(var(--page-h) * 0.0132);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+
+    .copyright-wrap {
+      position: relative;
+      z-index: 4;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 3%;
+      font-size: calc(var(--page-h) * 0.0165);
+      line-height: 1.58;
+      color: #5c4f4b;
+    }
+    .copyright-wrap p { margin-bottom: calc(var(--page-h) * 0.012); }
+    .copyright-title { font-style: italic; color: #352325; font-size: 1.1em; }
+    .copyright-kicker {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.0145);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--crimson-ink);
+      font-weight: 600;
+      margin-bottom: calc(var(--page-h) * 0.014);
+    }
+
+    .dedication-text {
+      font-style: italic;
+      font-size: calc(var(--page-h) * 0.0242);
+      line-height: 1.78;
+      color: #362527;
+      max-width: 92%;
+    }
+
+    .epigraph-author {
+      margin-top: calc(var(--page-h) * 0.022);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.0185);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    /* Interactive Table of Contents */
+    .toc-wrap {
+      position: relative;
+      z-index: 40;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .toc-heading {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0248);
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      text-align: center;
+      color: #3c1f25;
+      margin-bottom: calc(var(--page-h) * 0.024);
+    }
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--page-h) * 0.012);
+    }
+    .toc-item {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: calc(var(--page-h) * 0.005) calc(var(--page-h) * 0.007);
+      border-radius: 4px;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .toc-item:hover { background: rgba(125, 25, 43, 0.08); transform: translateX(3px); }
+    .toc-part-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.0140);
+      letter-spacing: 0.15em;
+      color: var(--crimson-ink);
+      text-transform: uppercase;
+      display: block;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+    .toc-part-title {
+      font-size: calc(var(--page-h) * 0.0212);
+      font-style: italic;
+      color: #2d2224;
+      line-height: 1.24;
+    }
+    .toc-dots {
+      flex: 1;
+      border-bottom: 1px dotted rgba(105, 72, 76, 0.35);
+      margin: 0 calc(var(--page-h) * 0.012);
+      transform: translateY(-3px);
+    }
+    .toc-pg {
+      font-size: calc(var(--page-h) * 0.0188);
+      color: var(--ink-soft);
+    }
+
+    /* Part Opener Styling */
+    .part-sketch {
+      margin-bottom: calc(var(--page-h) * 0.024);
+      opacity: 0.90;
+    }
+    .part-sketch svg {
+      height: calc(var(--page-h) * 0.120);
+      width: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .part-roman {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0162);
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--crimson-ink);
+      margin-bottom: calc(var(--page-h) * 0.012);
+    }
+    .part-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.039);
+      font-weight: 400;
+      font-style: italic;
+      color: #2c1e20;
+      line-height: 1.18;
+      margin-bottom: calc(var(--page-h) * 0.016);
+      max-width: 92%;
+    }
+    .part-sub {
+      font-size: calc(var(--page-h) * 0.0205);
+      color: var(--ink-muted);
+      font-style: italic;
+      max-width: 86%;
+      line-height: 1.50;
+    }
+
+    /* Poem Template (Proportioned for Clean Zero-Overflow Literary Margins) */
+    .poem-wrap {
+      position: relative;
+      z-index: 4;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 1% 4% 2%;
+    }
+    .poem-body {
+      font-size: calc(var(--page-h) * 0.0230);
+      line-height: 1.64;
+      color: #241b1c;
+      white-space: pre-line;
+    }
+    .poem-title-tag {
+      margin-top: calc(var(--page-h) * 0.024);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: calc(var(--page-h) * 0.0195);
+      color: #84454f;
+      letter-spacing: 0.04em;
+    }
+
+    /* Short Lyrical Prose Template with Crimson-Ink Drop Cap */
+    .prose-wrap {
+      position: relative;
+      z-index: 4;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 1% 3%;
+    }
+    .prose-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: calc(var(--page-h) * 0.0285);
+      font-weight: 500;
+      color: #3c1f24;
+      margin-bottom: calc(var(--page-h) * 0.018);
+      line-height: 1.24;
+    }
+    .prose-text {
+      font-size: calc(var(--page-h) * 0.0210);
+      line-height: 1.68;
+      color: #2a2021;
+      text-align: left;
+    }
+    .prose-text p + p {
+      margin-top: calc(var(--page-h) * 0.015);
+      text-indent: 1.3em;
+    }
+    .prose-text.has-dropcap p:first-of-type::first-letter {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      float: left;
+      font-size: 3em;
+      line-height: 0.82;
+      padding-right: 0.18em;
+      padding-top: 0.06em;
+      color: var(--crimson-ink);
+      font-weight: 500;
+    }
+    .prose-sign {
+      margin-top: calc(var(--page-h) * 0.022);
+      font-family: 'La Belle Aurore', cursive;
+      font-size: calc(var(--page-h) * 0.036);
+      color: var(--crimson-ink);
+    }
+    .poem-tiny-ornament {
+      margin-top: calc(var(--page-h) * 0.020);
+      opacity: 0.65;
+    }
+    .poem-tiny-ornament svg {
+      height: calc(var(--page-h) * 0.032);
+      width: auto;
+      display: block;
+    }
+
+    /* Clickable Quotes Index ("Lines Kept in the Margin") */
+    .margin-index-wrap {
+      position: relative;
+      z-index: 40;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .margin-heading {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0205);
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-align: center;
+      color: #3c1f25;
+      margin-bottom: calc(var(--page-h) * 0.018);
+    }
+    .margin-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--page-h) * 0.012);
+    }
+    .margin-item {
+      cursor: pointer;
+      padding: calc(var(--page-h) * 0.005) calc(var(--page-h) * 0.010);
+      border-left: 1.5px solid rgba(125, 25, 43, 0.34);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .margin-item:hover {
+      background: rgba(125, 25, 43, 0.07);
+      border-left-color: var(--crimson-ink);
+    }
+    .margin-line {
+      font-style: italic;
+      font-size: calc(var(--page-h) * 0.0168);
+      line-height: 1.38;
+      color: #2f2224;
+      display: block;
+    }
+    .margin-meta {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--page-h) * 0.0138);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-top: calc(var(--page-h) * 0.003);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* About the Author & Colophon */
+    .about-wrap {
+      position: relative;
+      z-index: 4;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 2% 5%;
+    }
+    .about-heading {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--page-h) * 0.0235);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #3c1f24;
+      margin-bottom: calc(var(--page-h) * 0.020);
+      text-align: center;
+    }
+    .about-monogram {
+      width: calc(var(--page-h) * 0.078);
+      height: calc(var(--page-h) * 0.078);
+      border-radius: 50%;
+      border: 1px solid rgba(125, 25, 43, 0.42);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto calc(var(--page-h) * 0.020);
+      font-family: 'La Belle Aurore', cursive;
+      font-size: calc(var(--page-h) * 0.038);
+      color: var(--crimson-ink);
+      background: rgba(125, 25, 43, 0.05);
+    }
+    .about-text {
+      font-size: calc(var(--page-h) * 0.0212);
+      line-height: 1.7;
+      color: #362628;
+      text-align: center;
+    }
+    .about-text p + p { margin-top: calc(var(--page-h) * 0.016); }
+
+    .colophon-wrap {
+      position: relative;
+      z-index: 4;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      text-align: center;
+      padding-bottom: 8%;
+      font-size: calc(var(--page-h) * 0.0166);
+      line-height: 1.68;
+      color: var(--ink-muted);
+      font-style: italic;
+    }
+    .colophon-sprig svg {
+      height: calc(var(--page-h) * 0.038);
+      width: auto;
+      display: block;
+    }
+
+    /* Invisible Edge Click Zones for Natural Page Turning */
+    .flip-zone {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 15%;
+      z-index: 30;
+      cursor: pointer;
+    }
+    .flip-zone.left { left: 0; }
+    .flip-zone.right { right: 0; }
+
+    /* =========================================================================
+       7. Bottom Pagination Pill
+       ========================================================================= */
+    .bottom-nav {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--ui-surface);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--ui-border);
+      box-shadow: 0 8px 26px rgba(34, 16, 20, 0.16);
+    }
+
+    .nav-arrow {
+      appearance: none;
+      border: 1px solid var(--ui-border);
+      background: transparent;
+      color: var(--ui-text);
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    .nav-arrow:hover:not(:disabled) {
+      background: var(--crimson-ink);
+      color: #f8f1eb;
+      border-color: var(--crimson-ink);
+    }
+    .nav-arrow:disabled { opacity: 0.32; cursor: not-allowed; }
+
+    .page-indicator {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ui-text);
+      min-width: 146px;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    /* =========================================================================
+       8. Slide-Out Chapter & Section Index Drawer
+       ========================================================================= */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 10, 13, 0.50);
+      backdrop-filter: blur(3px);
+      z-index: 180;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .chapter-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: min(340px, 88vw);
+      background: #f6f0e8;
+      color: #2c2022;
+      z-index: 190;
+      box-shadow: 18px 0 48px rgba(24, 10, 14, 0.32);
+      transform: translateX(-102%);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(125, 25, 43, 0.16);
+    }
+    .chapter-drawer.open { transform: translateX(0); }
+
+    .drawer-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid rgba(125, 25, 43, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .drawer-title {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #3d1c23;
+    }
+    .drawer-close {
+      border: none;
+      background: rgba(125, 25, 43, 0.10);
+      color: #3d1c23;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 17px;
+      line-height: 1;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px 24px;
+    }
+    .drawer-group-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      padding: 10px 8px 6px;
+    }
+    .drawer-item {
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      padding: 9px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      color: #2e2123;
+      transition: background 0.18s ease;
+      font-family: 'EB Garamond', serif;
+    }
+    .drawer-item:hover { background: rgba(125, 25, 43, 0.09); }
+    .drawer-item.active {
+      background: rgba(125, 25, 43, 0.14);
+      font-weight: 500;
+    }
+    .drawer-item-title { font-size: 15.5px; display: block; }
+    .drawer-item-sub {
+      font-size: 12px;
+      font-style: italic;
+      color: #6b585c;
+      display: block;
+    }
+    .drawer-item-pg {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 12.5px;
+      color: var(--crimson-ink);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       9. Shared Modal Styles (Customize + Full-Wrap Cover Inspector)
+       ========================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 9, 12, 0.66);
+      backdrop-filter: blur(5px);
+      z-index: 210;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      overflow-y: auto;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      background: #f7f1ea;
+      color: #2c2022;
+      width: 100%;
+      max-width: 450px;
+      max-height: 92dvh;
+      overflow-y: auto;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+      border: 1px solid rgba(125, 25, 43, 0.18);
+    }
+    .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 600; margin-bottom: 4px; color: #36191f; }
+    .modal-desc { font-size: 14px; color: #68585b; margin-bottom: 14px; }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 480px) {
+      .field-row { grid-template-columns: 1fr; }
+    }
+    .field-group { margin-bottom: 10px; }
+    .field-group label {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #544145;
+      margin-bottom: 4px;
+    }
+    .field-group input, .field-group textarea {
+      width: 100%;
+      padding: 8px 11px;
+      border-radius: 8px;
+      border: 1px solid rgba(125, 25, 43, 0.25);
+      background: #fdfaf6;
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      color: #261d1f;
+      outline: none;
+    }
+    .field-group input:focus, .field-group textarea:focus { border-color: var(--crimson-ink); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+    .btn-secondary, .btn-primary {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14.5px;
+      font-weight: 600;
+      padding: 7px 17px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-secondary { background: rgba(105, 65, 72, 0.12); color: #3e2a2e; }
+    .btn-primary { background: var(--crimson-ink); color: #f8f2ec; }
+
+    /* =========================================================================
+       10. Full-Wrap Archival Cover Inspector (Back + Spine + Front + Bleed Guides)
+       ========================================================================= */
+    .wrap-modal-card {
+      background: #f5eee7;
+      color: #2c2022;
+      width: min(92vw, 960px);
+      max-height: 92vh;
+      max-height: 92dvh;
+      border-radius: 16px;
+      padding: 16px 18px 16px;
+      box-shadow: 0 28px 75px rgba(0, 0, 0, 0.48);
+      border: 1px solid rgba(125, 25, 43, 0.22);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .wrap-header {
+      flex: 0 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(125, 25, 43, 0.15);
+    }
+    .wrap-specs {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 12.5px;
+      color: #635356;
+      letter-spacing: 0.03em;
+    }
+    .wrap-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .bleed-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #3e282c;
+      background: rgba(125, 25, 43, 0.10);
+      padding: 6px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .bleed-toggle input { accent-color: var(--crimson-ink); cursor: pointer; }
+
+    .wrap-viewport {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      max-height: 70vh;
+      max-height: 70dvh;
+      padding: 14px;
+      background: #d5c5bf;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+
+      --wrap-max-w: min(880px, calc(92vw - 68px));
+      --wrap-h: min(calc(64vh - 28px), 560px, calc(var(--wrap-max-w) / 1.257));
+      --wrap-h: min(calc(64dvh - 28px), 560px, calc(var(--wrap-max-w) / 1.257));
+      --wrap-w: calc(var(--wrap-h) * 1.257);
+    }
+
+    .full-wrap-sheet {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      width: var(--wrap-w);
+      height: var(--wrap-h);
+      flex: 0 0 auto;
+      background: radial-gradient(circle at 50% 45%, #2b0a14 0%, #18060b 65%, #0e0306 100%);
+      box-shadow: 0 16px 38px rgba(24, 9, 13, 0.42);
+      overflow: hidden;
+
+      --page-h: calc(var(--wrap-h) * 0.9697);
+      --page-w: calc(var(--page-h) * 0.625);
+    }
+
+    .wrap-panel-back, .wrap-panel-front {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .wrap-panel-spine {
+      flex: 0 0 3.4%;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.42), rgba(223, 191, 138, 0.12) 24%, rgba(255, 255, 255, 0.04) 76%, rgba(0, 0, 0, 0.45));
+      border-left: 1px solid rgba(223, 191, 138, 0.22);
+      border-right: 1px solid rgba(223, 191, 138, 0.22);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4.5% 0;
+      position: relative;
+      z-index: 6;
+      overflow: hidden;
+    }
+    .spine-title {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: calc(var(--wrap-h) * 0.0175);
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #e7c995;
+      white-space: nowrap;
+    }
+    .spine-author {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: calc(var(--wrap-h) * 0.0165);
+      font-weight: 500;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #d6b6ac;
+      white-space: nowrap;
+    }
+    .spine-sprig {
+      opacity: 0.88;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .spine-sprig svg {
+      width: calc(var(--wrap-h) * 0.023);
+      height: auto;
+      display: block;
+    }
+
+    /* Prepress 0.125" Trim, Safe-Zone & Spine Fold Guides */
+    .bleed-guides-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 25;
+      display: none;
+    }
+    .full-wrap-sheet.show-guides .bleed-guides-overlay { display: block; }
+    .guide-trim-box {
+      position: absolute;
+      top: 1.52%; bottom: 1.52%; left: 1.2%; right: 1.2%;
+      border: 1.5px dashed #ff5c8a;
+    }
+    .guide-safe-left {
+      position: absolute;
+      top: 4.5%; bottom: 4.5%; left: 3.6%; right: 54%;
+      border: 1px dotted #74c0fc;
+    }
+    .guide-safe-right {
+      position: absolute;
+      top: 4.5%; bottom: 4.5%; left: 54%; right: 3.6%;
+      border: 1px dotted #74c0fc;
+    }
+    .guide-spine-fold {
+      position: absolute;
+      top: 0; bottom: 0; left: 48.3%; right: 48.3%;
+      border-left: 1.2px dashed #69db7c;
+      border-right: 1.2px dashed #69db7c;
+    }
+    .guide-badge {
+      position: absolute;
+      font-family: 'Courier New', monospace;
+      font-size: max(7px, calc(var(--wrap-h) * 0.016));
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(18, 6, 10, 0.90);
+      line-height: 1.2;
+    }
+    .guide-badge.trim { top: 2.2%; left: 1.8%; color: #ff85a8; }
+    .guide-badge.safe { top: 5.2%; right: 4.2%; color: #a5d8ff; }
+    .guide-badge.spine { bottom: 2.2%; left: 50%; transform: translateX(-50%); color: #8ce99a; white-space: nowrap; }
+
+    .wrap-legend {
+      flex: 0 0 auto;
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 12.5px;
+      color: #5b4a4d;
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* =========================================================================
+       11. Dedicated 5x8 Trade Book Print / Save as PDF Export Styles
+       ========================================================================= */
+    #printBookContainer { display: none; }
+
+    @media print {
+      @page { size: 5in 8in; margin: 0; }
+      :root, #printBookContainer, #printBookContainer .book-page {
+        --page-h: 8in !important;
+        --page-w: 5in !important;
+      }
+      body {
+        background: #fff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body::before, #emberCanvas, .toolbar, .stage, .bottom-nav, .modal-backdrop, .drawer-backdrop, .chapter-drawer {
+        display: none !important;
+      }
+      #printBookContainer { display: block !important; }
+      #printBookContainer .book-page {
+        width: 5in !important;
+        height: 8in !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        break-after: page;
+      }
+      #printBookContainer .book-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Subtle Candlelit Gold Dust & Warm Ash Embers Atmospheric Canvas -->
+  <canvas id="emberCanvas" aria-hidden="true"></canvas>
+
+  <!-- Floating Top Frosted-Glass Book Toolbar -->
+  <nav class="toolbar" aria-label="Book controls">
+    <button class="tool-btn" id="btnFrontCover" onclick="goToPageId('front-cover')">Front Cover</button>
+    <button class="tool-btn" id="btnContents" onclick="goToPageId('contents')">Contents</button>
+    <button class="tool-btn" id="btnChapters" onclick="toggleChapterDrawer()" aria-label="Open chapter index">Chapters</button>
+    <button class="tool-btn" id="btnBackCover" onclick="goToPageId('back-cover')">Back Cover</button>
+    <div class="tool-divider"></div>
+    <button class="tool-btn" id="btnFullWrap" onclick="openFullWrap()">Full Wrap</button>
+    <button class="tool-btn" id="btnViewMode" onclick="toggleViewMode()">Spread View</button>
+    <button class="tool-btn active" id="btnEmbers" onclick="toggleEmbers()">Embers</button>
+    <button class="tool-btn" id="btnNightMode" onclick="toggleNightMode()">Night</button>
+    <div class="tool-divider"></div>
+    <button class="tool-btn" onclick="openPersonalize()">Customize</button>
+    <button class="tool-btn" onclick="printRealBook()">Save PDF / Print</button>
+  </nav>
+
+  <!-- Slide-Out Quick Chapter & Section Index Drawer -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeChapterDrawer()"></div>
+  <aside class="chapter-drawer" id="chapterDrawer" aria-label="Chapters and manuscript sections">
+    <div class="drawer-header">
+      <h2 class="drawer-title">Manuscript Index</h2>
+      <button class="drawer-close" onclick="closeChapterDrawer()" aria-label="Close index">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <!-- Main Physical Book Reading Stage -->
+  <main class="stage">
+    <div class="book-wrapper" id="bookWrapper">
+      <div class="book-stage" id="bookStage"></div>
+    </div>
+  </main>
+
+  <!-- Bottom Pagination Pill -->
+  <footer class="bottom-nav">
+    <button class="nav-arrow" id="prevBtn" onclick="prevStep()" aria-label="Previous page">&#8592;</button>
+    <div class="page-indicator" id="pageIndicator">Front Cover</div>
+    <button class="nav-arrow" id="nextBtn" onclick="nextStep()" aria-label="Next page">&#8594;</button>
+  </footer>
+
+  <!-- Live Customize Manuscript Modal -->
+  <div class="modal-backdrop" id="personalizeModal" onclick="if (event.target === this) closePersonalize()">
+    <div class="modal-card">
+      <h2 class="modal-title">Customize Manuscript</h2>
+      <p class="modal-desc">Updates front cover, volume badge, archival seal, running headers, spine wrap, title pages, and 5&times;8 PDF export live.</p>
+      <div class="field-row">
+        <div class="field-group">
+          <label for="inputCoverTitle">Cover Title (/ for breaks)</label>
+          <input type="text" id="inputCoverTitle" />
+        </div>
+        <div class="field-group">
+          <label for="inputPartLabel">Part / Volume Label</label>
+          <input type="text" id="inputPartLabel" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="inputDisplayTitle">Formal Title (Title Page, Running Head &amp; Spine)</label>
+        <input type="text" id="inputDisplayTitle" />
+      </div>
+      <div class="field-group">
+        <label for="inputSubtitle">Subtitle</label>
+        <input type="text" id="inputSubtitle" />
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label for="inputAuthor">Author Credit</label>
+          <input type="text" id="inputAuthor" />
+        </div>
+        <div class="field-group">
+          <label for="inputEditionLabel">Private Edition Label</label>
+          <input type="text" id="inputEditionLabel" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="inputDedication">Dedication</label>
+        <textarea id="inputDedication" rows="4"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closePersonalize()">Cancel</button>
+        <button class="btn-primary" onclick="savePersonalize()">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-Wrap Archival Cover Inspector Modal -->
+  <div class="modal-backdrop" id="fullWrapModal" onclick="if (event.target === this) closeFullWrap()">
+    <div class="wrap-modal-card">
+      <div class="wrap-header">
+        <div>
+          <h2 class="modal-title" style="margin-bottom: 2px;">Full-Wrap Private Book Cover Inspector</h2>
+          <div class="wrap-specs" id="wrapSpecsLine"></div>
+        </div>
+        <div class="wrap-controls">
+          <label class="bleed-toggle">
+            <input type="checkbox" id="toggleBleedGuides" checked onchange="toggleBleedOverlay()" />
+            Show 0.125&Prime; Trim &amp; Bleed Guides
+          </label>
+          <button class="btn-secondary" onclick="closeFullWrap()">Close</button>
+        </div>
+      </div>
+
+      <div class="wrap-viewport">
+        <div class="full-wrap-sheet show-guides" id="fullWrapSheet"></div>
+      </div>
+
+      <div class="wrap-legend">
+        <span><i class="legend-dot" style="border: 1.5px dashed #ff5c8a;"></i>Trim Line (0.125&Prime; Bleed Outside)</span>
+        <span><i class="legend-dot" style="border: 1px dotted #1c7ed6;"></i>Type Safe Zone (0.25&Prime; Margin)</span>
+        <span><i class="legend-dot" style="border: 1.5px dashed #2b8a3e;"></i>Spine Fold Hinges</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Container Populated During 5x8 Print / Save as PDF -->
+  <div id="printBookContainer"></div>
+
+  <script>
+    /* =========================================================================
+       1. Editable Author's Manuscript Metadata (Book II — Strictly English)
+       ========================================================================= */
+    const bookMeta = {
+      coverTitleLines: ["The Curse", "of the", "Unloved"],
+      partLabel: "Part II",
+      displayTitle: "The Curse of the Unloved: Part II",
+      subtitle: "poems & quiet prose on the cost of staying, the vanity of over-giving, and learning when to leave the table",
+      authorCredit: "Written by Irish",
+      authorShort: "Irish",
+      editionLabel: "Private Written Title • Book II",
+      coverWhisper: "Some doors stay open long after the guest has already gone.",
+      dedication: "For everyone who kept a lamp burning\nin a room nobody asked to enter—\nand for the night you finally\nturned the switch off yourself."
+    };
+
+    /* =========================================================================
+       2. Bespoke Minimalist Crimson-and-Ink Chapter Sketches & Literary Motifs
+       ========================================================================= */
+    const sketches = {
+      // Frontispiece, Title Page, Prose & Colophon Minimalist Lamp/Doorway Ornament
+      tinyArchMotif: `
+        <svg viewBox="0 0 64 52" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <path d="M18 46 V22 C18 13, 24 7, 32 7 C40 7, 46 13, 46 22 V46" stroke="#533d3a" stroke-width="1.05" stroke-linecap="round"/>
+          <path d="M22 46 V22 C22 15.5, 26.5 11, 32 11 C37.5 11, 42 15.5, 42 22 V46" stroke="#7d192b" stroke-opacity="0.50" stroke-width="0.75"/>
+          <path d="M28 24 H36 L38 31 H26 L28 24 Z" fill="#7d192b" fill-opacity="0.16" stroke="#7d192b" stroke-width="0.9"/>
+          <line x1="32" y1="31" x2="32" y2="41" stroke="#533d3a" stroke-width="0.95"/>
+          <line x1="27" y1="41" x2="37" y2="41" stroke="#533d3a" stroke-width="0.95"/>
+          <line x1="12" y1="46" x2="52" y2="46" stroke="#533d3a" stroke-width="1" stroke-linecap="round"/>
+        </svg>`,
+
+      // Back Cover Minimalist Gold Arch & Latch Emblem
+      goldDoorEmblem: `
+        <svg viewBox="0 0 130 44" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <line x1="6" y1="24" x2="46" y2="24" stroke="#dfbf8a" stroke-opacity="0.42" stroke-width="0.8"/>
+          <line x1="84" y1="24" x2="124" y2="24" stroke="#dfbf8a" stroke-opacity="0.42" stroke-width="0.8"/>
+          <path d="M55 36 V18 C55 11.5, 59.5 7, 65 7 C70.5 7, 75 11.5, 75 18 V36" stroke="#dfbf8a" stroke-opacity="0.74" stroke-width="0.95"/>
+          <line x1="51" y1="36" x2="79" y2="36" stroke="#dfbf8a" stroke-opacity="0.55" stroke-width="0.8"/>
+          <circle cx="69" cy="23" r="1.7" fill="#c8354e"/>
+          <line x1="69" y1="23" x2="73" y2="23" stroke="#dfbf8a" stroke-width="0.9" stroke-linecap="round"/>
+        </svg>`,
+
+      // Spine Miniature Arch Icon
+      spineArchIcon: `
+        <svg viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 27 V12 C5 7.5, 8.2 4, 12 4 C15.8 4, 19 7.5, 19 12 V27" stroke="#dfbf8a" stroke-opacity="0.74" stroke-width="1"/>
+          <line x1="3" y1="27" x2="21" y2="27" stroke="#dfbf8a" stroke-opacity="0.55" stroke-width="0.9"/>
+          <circle cx="14.5" cy="17" r="1.4" fill="#c8354e"/>
+        </svg>`,
+
+      // Part I: Teacup going cold with a thin curl of fading steam
+      partOneTeacup: `
+        <svg viewBox="0 0 124 92" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <!-- Quiet Table Surface -->
+          <line x1="12" y1="76" x2="112" y2="76" stroke="#4f3734" stroke-width="1.1" stroke-linecap="round"/>
+          <!-- Saucer -->
+          <path d="M27 71 C40 76, 82 76, 95 71" stroke="#4f3734" stroke-width="1.15" stroke-linecap="round"/>
+          <ellipse cx="61" cy="70" rx="34" ry="4.5" fill="#f2e8dc" stroke="#4f3734" stroke-width="0.95"/>
+          <!-- Teacup Body -->
+          <path d="M39 38 H83 L79 60 C78 66.5, 70 70, 61 70 C52 70, 44 66.5, 43 60 L39 38 Z" fill="#faf5ee" stroke="#4f3734" stroke-width="1.15"/>
+          <ellipse cx="61" cy="38" rx="22" ry="4.2" fill="#faf5ee" stroke="#4f3734" stroke-width="1.05"/>
+          <!-- Cooling Tea Level -->
+          <path d="M41.5 51 C47 54, 75 54, 80.5 51" stroke="#7d192b" stroke-width="1" stroke-dasharray="2.5 2"/>
+          <path d="M42 52 L43.2 59.5 C44.2 65.5, 51.5 69, 61 69 C70.5 69, 77.8 65.5, 78.8 59.5 L80 52 C74 54.5, 48 54.5, 42 52 Z" fill="#7d192b" fill-opacity="0.15"/>
+          <!-- Teacup Handle -->
+          <path d="M82 43 C93 43, 95 55, 81 58" stroke="#4f3734" stroke-width="1.2" stroke-linecap="round"/>
+          <!-- Thin Curl of Fading Steam -->
+          <path d="M60 31 C56 26, 65 21, 59 15 C55 11, 59 7, 62 5" stroke="#7d192b" stroke-opacity="0.52" stroke-width="0.95" stroke-linecap="round"/>
+          <path d="M68 29 C71 25, 66 21, 69 17" stroke="#7d192b" stroke-opacity="0.28" stroke-width="0.75" stroke-linecap="round"/>
+        </svg>`,
+
+      // Part II: Simple wooden chair with an empty coat draped over the back
+      partTwoChair: `
+        <svg viewBox="0 0 116 96" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <!-- Floor line -->
+          <line x1="18" y1="86" x2="98" y2="86" stroke="#4f3734" stroke-width="1" stroke-linecap="round"/>
+          <!-- Wooden Chair Frame -->
+          <line x1="40" y1="16" x2="40" y2="86" stroke="#4f3734" stroke-width="1.35" stroke-linecap="round"/>
+          <line x1="72" y1="16" x2="72" y2="54" stroke="#4f3734" stroke-width="1.3" stroke-linecap="round"/>
+          <line x1="40" y1="22" x2="72" y2="22" stroke="#4f3734" stroke-width="1.2"/>
+          <line x1="40" y1="36" x2="72" y2="36" stroke="#4f3734" stroke-width="1"/>
+          <path d="M36 54 H78 L82 59 H34 L36 54 Z" fill="#f2e7db" stroke="#4f3734" stroke-width="1.15"/>
+          <line x1="77" y1="59" x2="79" y2="86" stroke="#4f3734" stroke-width="1.35" stroke-linecap="round"/>
+          <line x1="46" y1="59" x2="47" y2="83" stroke="#4f3734" stroke-width="1.15" stroke-linecap="round"/>
+          <line x1="40" y1="73" x2="78" y2="73" stroke="#4f3734" stroke-width="0.9"/>
+          <!-- Empty Coat Draped Over Chair Back -->
+          <path d="M37 19 C43 13, 68 13, 75 19 C81 26, 84 42, 85 59 C79 62, 71 61, 66 56 C63 48, 63 36, 58 34 C54 38, 53 50, 49 62 C43 63, 36 60, 33 55 C34 40, 35 28, 37 19 Z"
+                fill="#7d192b" fill-opacity="0.14" stroke="#7d192b" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M51 17 C55 24, 58 28, 59 35" stroke="#7d192b" stroke-width="0.9" stroke-linecap="round"/>
+          <path d="M74 26 C77 37, 78 47, 76 57" stroke="#7d192b" stroke-opacity="0.65" stroke-width="0.85" stroke-linecap="round"/>
+        </svg>`,
+
+      // Part III: Cracked hand mirror with a single clean fault line across the glass
+      partThreeMirror: `
+        <svg viewBox="0 0 110 98" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <!-- Outer Oval Hand Mirror Frame -->
+          <ellipse cx="55" cy="37" rx="23" ry="29" fill="#f3e8dd" stroke="#4f3734" stroke-width="1.3"/>
+          <!-- Inner Glass Oval -->
+          <ellipse cx="55" cy="37" rx="18.5" ry="24.5" fill="#faf6f0" stroke="#4f3734" stroke-opacity="0.55" stroke-width="0.85"/>
+          <!-- Subtle Glass Sheen -->
+          <line x1="43" y1="24" x2="52" y2="16" stroke="#8a746c" stroke-opacity="0.35" stroke-width="0.75"/>
+          <line x1="41" y1="31" x2="57" y2="17" stroke="#8a746c" stroke-opacity="0.22" stroke-width="0.65"/>
+          <!-- Single Clean Crimson Fault Line Across the Glass -->
+          <path d="M68 18 L57 34 L59 37 L44 57" stroke="#7d192b" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Hand Mirror Collar & Handle -->
+          <path d="M50 65.5 C52 68.5, 58 68.5, 60 65.5" stroke="#4f3734" stroke-width="1.15"/>
+          <path d="M53.2 67.5 L52.2 89 C52.2 91.5, 57.8 91.5, 57.8 89 L56.8 67.5" fill="#f3e8dd" stroke="#4f3734" stroke-width="1.15" stroke-linejoin="round"/>
+          <circle cx="55" cy="87.5" r="1.4" fill="#7d192b" fill-opacity="0.75"/>
+        </svg>`,
+
+      // Part IV: Slightly ajar wooden doorway with warm light spilling across the threshold
+      partFourDoorway: `
+        <svg viewBox="0 0 124 96" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <!-- Warm Slant of Light Spilling Across the Threshold -->
+          <polygon points="44,82 70,82 96,93 30,93" fill="#dfbf8a" fill-opacity="0.24"/>
+          <polygon points="44,82 70,82 88,92 36,92" fill="#7d192b" fill-opacity="0.09"/>
+          <polygon points="44,14 66,14 66,82 44,82" fill="#dfbf8a" fill-opacity="0.22"/>
+          <!-- Outer Doorframe -->
+          <path d="M40 82 V11 H82 V82" stroke="#4f3734" stroke-width="1.35" stroke-linejoin="miter"/>
+          <line x1="20" y1="82" x2="104" y2="82" stroke="#4f3734" stroke-width="1.05" stroke-linecap="round"/>
+          <!-- Slightly Ajar Wooden Door Leaf -->
+          <polygon points="66,14 82,11 82,82 66,86" fill="#f3e9de" stroke="#4f3734" stroke-width="1.15" stroke-linejoin="round"/>
+          <!-- Recessed Wood Panels -->
+          <polygon points="69,20 79,18 79,45 69,46" stroke="#4f3734" stroke-opacity="0.45" stroke-width="0.75"/>
+          <polygon points="69,53 79,52 79,77 69,79" stroke="#4f3734" stroke-opacity="0.45" stroke-width="0.75"/>
+          <!-- Interior Latch Handle -->
+          <rect x="67.5" y="47.5" width="4.5" height="2.4" rx="0.8" fill="#7d192b"/>
+          <line x1="65.5" y1="48.7" x2="71.5" y2="48.7" stroke="#7d192b" stroke-width="1.25" stroke-linecap="round"/>
+          <circle cx="65.5" cy="48.7" r="1.4" fill="#7d192b"/>
+        </svg>`
+    };
+
+    /* =========================================================================
+       3. Hero Front Cover Engraving: Arched Midnight Doorway, Table Lamp & Latch
+       ========================================================================= */
+    function renderFrontCoverArtwork(uid = "main") {
+      return `
+        <svg class="cover-art-svg" viewBox="20 12 240 284" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gold foil engraving of an arched midnight doorway seen from inside, with a warm glowing table lamp on a small side table, a quiet brass interior latch, and a single dried dark-crimson stem on the threshold sill">
+          <defs>
+            <radialGradient id="${uid}_lampGlow" cx="50%" cy="46%" r="54%">
+              <stop offset="0%" stop-color="#ffe7b5" stop-opacity="0.60"/>
+              <stop offset="38%" stop-color="#d89d55" stop-opacity="0.25"/>
+              <stop offset="72%" stop-color="#7c2824" stop-opacity="0.09"/>
+              <stop offset="100%" stop-color="#18060b" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="${uid}_goldStroke" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f5dfb6"/>
+              <stop offset="50%" stop-color="#cfa668"/>
+              <stop offset="100%" stop-color="#9e753e"/>
+            </linearGradient>
+            <linearGradient id="${uid}_interiorDark" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#140408"/>
+              <stop offset="55%" stop-color="#220911"/>
+              <stop offset="100%" stop-color="#120307"/>
+            </linearGradient>
+            <linearGradient id="${uid}_lampShade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f7dca7"/>
+              <stop offset="100%" stop-color="#b87e3c"/>
+            </linearGradient>
+            <linearGradient id="${uid}_crimsonStem" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#5e0d1e"/>
+              <stop offset="55%" stop-color="#8c162d"/>
+              <stop offset="100%" stop-color="#450714"/>
+            </linearGradient>
+            <clipPath id="${uid}_archClip">
+              <path d="M74 246 V110 C74 70, 103 40, 140 40 C177 40, 206 70, 206 110 V246 Z"/>
+            </clipPath>
+          </defs>
+
+          <!-- Outer Fine Arch Engraving & Dashed Inner Molding -->
+          <path d="M64 250 V110 C64 64, 97 30, 140 30 C183 30, 216 64, 216 110 V250"
+                stroke="url(#${uid}_goldStroke)" stroke-opacity="0.58" stroke-width="0.9"/>
+          <path d="M70 248 V110 C70 68, 100 36, 140 36 C180 36, 210 68, 210 110 V248"
+                stroke="url(#${uid}_goldStroke)" stroke-opacity="0.34" stroke-width="0.65" stroke-dasharray="2.5 3"/>
+
+          <!-- Delicate Keystone Diamond Above Arch Crown -->
+          <path d="M140 18 L143.5 24 L140 30 L136.5 24 Z" fill="none" stroke="#e5c896" stroke-opacity="0.72" stroke-width="0.8"/>
+
+          <!-- Interior Arch Backdrop -->
+          <path d="M74 246 V110 C74 70, 103 40, 140 40 C177 40, 206 70, 206 110 V246 Z"
+                fill="url(#${uid}_interiorDark)" stroke="url(#${uid}_goldStroke)" stroke-width="1.25"/>
+
+          <!-- Clipped Room Interior: Warm Table Lamp on Small Side Table -->
+          <g clip-path="url(#${uid}_archClip)">
+            <!-- Soft Breathing Lamplight Glow -->
+            <circle class="lamp-glow-pulse" cx="140" cy="166" r="76" fill="url(#${uid}_lampGlow)"/>
+
+            <!-- Fine Architectural Transom Arch Geometry -->
+            <line x1="74" y1="110" x2="206" y2="110" stroke="#dfbf8a" stroke-opacity="0.22" stroke-width="0.65"/>
+            <line x1="140" y1="40" x2="140" y2="110" stroke="#dfbf8a" stroke-opacity="0.18" stroke-width="0.6"/>
+            <path d="M92 110 C92 82, 113 60, 140 60 C167 60, 188 82, 188 110"
+                  stroke="#dfbf8a" stroke-opacity="0.18" stroke-width="0.6"/>
+
+            <!-- Small Side Table Silhouette -->
+            <line x1="94" y1="214" x2="186" y2="214" stroke="#dfbf8a" stroke-opacity="0.52" stroke-width="1.15"/>
+            <line x1="104" y1="214" x2="104" y2="246" stroke="#dfbf8a" stroke-opacity="0.34" stroke-width="0.9"/>
+            <line x1="176" y1="214" x2="176" y2="246" stroke="#dfbf8a" stroke-opacity="0.34" stroke-width="0.9"/>
+            <line x1="104" y1="230" x2="176" y2="230" stroke="#dfbf8a" stroke-opacity="0.20" stroke-width="0.65"/>
+
+            <!-- Warm Glowing Table Lamp -->
+            <g class="lamp-glow-pulse">
+              <path d="M126 144 H154 L162 172 H118 L126 144 Z" fill="url(#${uid}_lampShade)" fill-opacity="0.92" stroke="#fff0cf" stroke-opacity="0.7" stroke-width="0.8"/>
+              <polygon points="118,172 162,172 182,214 98,214" fill="#f2cf94" fill-opacity="0.11"/>
+              <circle cx="140" cy="141" r="2" fill="#e8cd9b"/>
+              <line x1="140" y1="172" x2="140" y2="209" stroke="#e5c690" stroke-width="1.6"/>
+              <path d="M128 214 C130 209, 150 209, 152 214 Z" fill="#cfa668" stroke="#f2dca8" stroke-width="0.7"/>
+            </g>
+
+            <!-- Quiet Cup on Side Table -->
+            <path d="M161 204 H170 L169 213 H162 L161 204 Z" stroke="#dfbf8a" stroke-opacity="0.58" stroke-width="0.85" fill="#2b0d15"/>
+            <path d="M170 206 C173 206, 173 211, 169.5 211" stroke="#dfbf8a" stroke-opacity="0.55" stroke-width="0.8"/>
+          </g>
+
+          <!-- Quiet Brass Interior Latch on Right Doorframe -->
+          <g>
+            <rect x="202" y="154" width="12" height="28" rx="1.5" fill="#210910" stroke="url(#${uid}_goldStroke)" stroke-width="0.9"/>
+            <circle cx="208" cy="159" r="1.1" fill="#dfbf8a" opacity="0.75"/>
+            <circle cx="208" cy="177" r="1.1" fill="#dfbf8a" opacity="0.75"/>
+            <line x1="194" y1="168" x2="212" y2="168" stroke="#f3d8a8" stroke-width="1.9" stroke-linecap="round"/>
+            <circle cx="194" cy="168" r="2.7" fill="#dfbf8a" stroke="#18060b" stroke-width="0.6"/>
+          </g>
+
+          <!-- Threshold Sill Base -->
+          <rect x="52" y="246" width="176" height="8" rx="1" fill="#1d070e" stroke="url(#${uid}_goldStroke)" stroke-opacity="0.75" stroke-width="0.95"/>
+          <line x1="44" y1="254" x2="236" y2="254" stroke="url(#${uid}_goldStroke)" stroke-opacity="0.45" stroke-width="0.8"/>
+          <line x1="60" y1="260" x2="220" y2="260" stroke="url(#${uid}_goldStroke)" stroke-opacity="0.25" stroke-width="0.65"/>
+
+          <!-- Single Dried Dark-Crimson Stem Resting Quietly on the Threshold Sill -->
+          <g>
+            <path d="M78 245 C106 242, 146 247, 194 243" stroke="#855a44" stroke-width="1.35" stroke-linecap="round"/>
+            <path d="M78 245 C106 242, 146 247, 194 243" stroke="#dfbf8a" stroke-opacity="0.32" stroke-width="0.55" stroke-linecap="round"/>
+            <path d="M126 244 L122 239 L129 243 Z" fill="#6e4437"/>
+            <path d="M148 245 C140 237, 128 236, 122 241 C131 245, 141 246, 148 245 Z" fill="#2d0f17" stroke="#dfbf8a" stroke-opacity="0.38" stroke-width="0.65"/>
+            <path d="M192 243 C196 237, 206 236, 211 240 C207 246, 197 247, 192 243 Z"
+                  fill="url(#${uid}_crimsonStem)" stroke="#e5c690" stroke-opacity="0.55" stroke-width="0.75"/>
+            <path d="M198 241 C202 239.5, 206 239.5, 209 240.5" stroke="#f0a8b6" stroke-opacity="0.38" stroke-width="0.6" stroke-linecap="round"/>
+          </g>
+        </svg>
+      `;
+    }
+
+    /* =========================================================================
+       4. Bespoke Circular Archival Ex-Libris Seal (Book II • No. 002, No Barcode)
+       ========================================================================= */
+    function resolveBookToken() {
+      const partClean = (bookMeta.partLabel || "Part II").trim();
+      const romanMatch = /\b(I{1,3}|IV|V|VI|\d+)\b$/i.exec(partClean);
+      return romanMatch ? `BOOK ${romanMatch[1].toUpperCase()}` : "BOOK II";
+    }
+
+    function renderArchivalSealSVG(uid = "main") {
+      const authorUpper = escapeHTML((bookMeta.authorShort || "IRISH").toUpperCase());
+      const bookToken = escapeHTML(resolveBookToken());
+      return `
+        <svg class="archival-seal-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Private Written Seal: PRIVATE WRITTEN • ${authorUpper} • ${bookToken} • NO. 002">
+          <defs>
+            <path id="${uid}_sealTopArc" d="M 18,60 A 42,42 0 1,1 102,60" />
+            <path id="${uid}_sealBotArc" d="M 17,62 A 43,43 0 0,0 103,62" />
+          </defs>
+
+          <circle cx="60" cy="60" r="55.5" stroke="#dfbf8a" stroke-width="1.25" opacity="0.76" />
+          <circle cx="60" cy="60" r="52" stroke="#dfbf8a" stroke-width="0.6" stroke-dasharray="1.8 2.4" opacity="0.48" />
+          <circle cx="60" cy="60" r="31.5" stroke="#b82944" stroke-width="0.85" opacity="0.72" />
+
+          <circle cx="13.5" cy="60" r="1.4" fill="#dfbf8a" opacity="0.68" />
+          <circle cx="106.5" cy="60" r="1.4" fill="#dfbf8a" opacity="0.68" />
+
+          <text font-family="'Cinzel', Georgia, serif" font-size="7.1" font-weight="500" letter-spacing="1.45" fill="#e5c896">
+            <textPath href="#${uid}_sealTopArc" startOffset="50%" text-anchor="middle">PRIVATE WRITTEN &bull; ${authorUpper}</textPath>
+          </text>
+          <text font-family="'Cormorant Garamond', Georgia, serif" font-size="7.4" font-weight="600" letter-spacing="1.75" fill="#d9b4ab">
+            <textPath href="#${uid}_sealBotArc" startOffset="50%" text-anchor="middle">${bookToken} &bull; NO. 002</textPath>
+          </text>
+
+          <!-- Center Arched Doorway & Brass Latch Emblem -->
+          <g transform="translate(36, 36) scale(0.75)">
+            <path d="M18 52 V24 C18 14, 24 8, 32 8 C40 8, 46 14, 46 24 V52" fill="#4f0d1b" fill-opacity="0.55" stroke="#dfbf8a" stroke-width="1.4"/>
+            <line x1="12" y1="52" x2="52" y2="52" stroke="#dfbf8a" stroke-opacity="0.78" stroke-width="1.2"/>
+            <circle cx="32" cy="27" r="4" fill="#f3d8ae" opacity="0.82"/>
+            <line x1="36" y1="36" x2="46" y2="36" stroke="#dfbf8a" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="36" cy="36" r="1.8" fill="#d93855"/>
+          </g>
+        </svg>
+      `;
+    }
+
+    /* =========================================================================
+       5. Shared Front & Back Cover Renderers (Main Stage, Print & Full Wrap)
+       ========================================================================= */
+    function renderFrontCoverInner(uid = "main") {
+      const bookToken = resolveBookToken();
+      const coverTitleHTML = bookMeta.coverTitleLines
+        .map(line => {
+          const isConnector = /^(of|of the|the|in|to|a|an|and)$/i.test(line.trim());
+          return `<span class="cover-title-line ${isConnector ? "is-connector" : ""}">${escapeHTML(line)}</span>`;
+        })
+        .join("");
+
+      return `
+        <div class="front-cover-inner">
+          <div class="cover-gold-border"></div>
+          <div class="cover-top-kicker">Private Written Edition &bull; ${escapeHTML(bookToken)}</div>
+          <div class="cover-title-block">
+            <h1 class="cover-title-serif foil-title">${coverTitleHTML}</h1>
+            <div class="cover-part-badge">
+              <span class="cover-part-rule"></span>
+              <span class="cover-part-label foil-title">${escapeHTML(bookMeta.partLabel)}</span>
+              <span class="cover-part-rule right"></span>
+            </div>
+            <p class="cover-subtitle-whisper">&ldquo;${escapeHTML(bookMeta.coverWhisper)}&rdquo;</p>
+          </div>
+          <div class="cover-art-wrap">${renderFrontCoverArtwork(uid)}</div>
+          <div class="cover-author-block">
+            <div class="cover-gold-rule"></div>
+            <div class="cover-author">${escapeHTML(bookMeta.authorCredit)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBackCoverInner(uid = "main") {
+      const formalTitle = bookMeta.displayTitle;
+      const bookToken = resolveBookToken();
+      return `
+        <div class="back-cover-inner">
+          <div class="cover-gold-border"></div>
+          <div class="back-top-section">
+            <div class="back-top-ornament">${sketches.goldDoorEmblem}</div>
+            <div class="back-quote">
+              &ldquo;I kept the lamp lit<br/>
+              long after I knew<br/>
+              this was only a stop between trains.&rdquo;
+            </div>
+            <div class="back-divider"></div>
+            <p class="back-blurb">
+              The sharper, self-honest second volume, <em>${escapeHTML(formalTitle)}</em> unfolds across four unsentimental movements and twenty-two original poems and lyrical prose pieces&mdash;looking squarely at one-sided devotion, the quiet vanity hidden inside over-giving, and the midnight silence that follows when everyone leaves once their coat dries.
+            </p>
+            <p class="back-blurb">
+              Stripping away easy comfort and borrowed drama, ${escapeHTML(bookMeta.authorShort)} traces the slow discipline of closing the ledger, turning off the porch light, and leaving the table without turning cruel.
+            </p>
+          </div>
+
+          <div class="back-bottom-section">
+            <div class="back-author-note">
+              <strong>${escapeHTML(bookMeta.authorCredit)}</strong>
+              Twenty-two original poems and quiet prose pieces on staying too long, and finally stepping out.
+            </div>
+            <div class="back-footer">
+              <div class="back-manuscript-meta">
+                <span class="ms-heading">PRIVATE WRITTEN TITLE &bull; ${escapeHTML(bookToken)}</span>
+                POETRY &amp; LYRICAL PROSE<br/>
+                PRIVATE EDITION &bull; 2026
+              </div>
+              <div class="archival-seal-wrap">
+                ${renderArchivalSealSVG(uid)}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* =========================================================================
+       6. Complete Verbatim English Manuscript — Four Movements, 22 Pieces
+       (100% English — Zero Hindi/Hinglish, Zero Standalone Quote Filler Pages)
+       ========================================================================= */
+    const CHAPTERS = [
+      {
+        id: "part-1",
+        roman: "Part I",
+        title: "The Ledger of Small Glances",
+        subtitle: "keeping accounts of a devotion nobody ever asked to sign for",
+        sketch: sketches.partOneTeacup,
+        entries: [
+          {
+            kind: "poem",
+            key: "three-seconds",
+            tag: "three seconds",
+            ghost: "We shared a lift for three floors and you adjusted your cuff without looking up.",
+            body: "We shared a lift for three floors\nand you adjusted your cuff without looking up.\nI spent the rest of Tuesday\nrearranging the furniture of my chest\naround a silence you forgot\nbefore the doors even slid open."
+          },
+          {
+            kind: "poem",
+            key: "drafts-folder",
+            tag: "drafts folder",
+            ghost: "By 1:47 I cut it down to hope you reached safely. By 1:48 I closed the screen.",
+            body: "At 1:40 a.m. I wrote you four paragraphs\nnaming every hour I had waited by the sill.\nBy 1:47 I cut it down to \"hope you reached safely.\"\nBy 1:48 I closed the screen\nand called my cowardice restraint."
+          },
+          {
+            kind: "prose",
+            key: "the-unrequested-altar",
+            heading: "The Unrequested Altar",
+            paragraphs: [
+              "The hardest truth about one-sided love is not that the other person refuses to see you. It is how fiercely you protect their blindness. I memorized the slight drop in your voice before a bad week, the way you took your tea half-sweet, the exact pauses that meant you wanted company without admitting it.",
+              "I built an entire religion out of small observations and then resented you for never kneeling inside a temple I constructed without your permission."
+            ]
+          },
+          {
+            kind: "poem",
+            key: "read-receipt",
+            tag: "read receipt",
+            ghost: "I learned to read your name from the lock screen preview alone.",
+            body: "I learned to read your name\nfrom the lock screen preview alone,\nholding the phone at an angle\nso the blue ticks would not give me away—\nas if dignity were a trick of the thumb,\nas if starving slowly looked better\nthan knocking once and hearing no."
+          },
+          {
+            kind: "poem",
+            key: "the-wrong-listener",
+            tag: "the wrong listener",
+            ghost: "Every quiet habit you listed was something I had been practising around you for two years.",
+            body: "You sat across from me at the corner table,\ntearing a paper napkin into neat strips\nwhile describing the sort of person\nyou hoped to meet someday.\n\nEvery quiet habit you listed\nwas something I had been practising around you\nfor two years.\nI nodded, passed the sugar,\nand hated myself for staying polite."
+          },
+          {
+            kind: "prose",
+            key: "accounting",
+            heading: "Accounting",
+            paragraphs: [
+              "Nobody owes you a return on a currency they never agreed to borrow. I knew that even while I was keeping the ledger—counting every late-night call I answered, every train I missed to walk beside you, every slight I swallowed with an easy smile.",
+              "The uglier confession is that part of me did not want to be loved freely; I wanted to be owed."
+            ]
+          }
+        ]
+      },
+      {
+        id: "part-2",
+        roman: "Part II",
+        title: "The Waiting Room",
+        subtitle: "on mistaking usefulness for love, and being left behind once the coat dries",
+        sketch: sketches.partTwoChair,
+        entries: [
+          {
+            kind: "poem",
+            key: "between-trains",
+            tag: "between trains",
+            ghost: "You used my evenings like a waiting room.",
+            body: "You used my evenings like a waiting room.\nDropped your wet coat over my chair,\ndrank the tea while it was still hot,\ntalked until your voice stopped catching\non someone else's name.\n\nI let you—let's be honest about that.\nI thought if I kept the lamp lit long enough,\nyou'd forget this was only a stop between trains.\n\nNow you laugh with your whole chest again.\nYou take that clean, healed face out the door\nand leave me rinsing the mug you didn't finish."
+          },
+          {
+            kind: "poem",
+            key: "useful-hands",
+            tag: "useful hands",
+            ghost: "When your roof leaked, you remembered my number.",
+            body: "When your roof leaked, you remembered my number.\nWhen the sun came back out,\nyou forgot what street I lived on.\n\nAnd I—foolish enough to mistake urgency for affection—\nkept a toolbox by the door\njust in case another storm made me necessary."
+          },
+          {
+            kind: "prose",
+            key: "the-vanity-of-being-the-healer",
+            heading: "The Vanity of Being the Healer",
+            paragraphs: [
+              "There is a quiet ego hidden inside endless kindness. We tell ourselves we stayed because we are softer, nobler, more loyal than everyone else. Half of that is a lie.",
+              "Sometimes you stay beside broken people because a whole person might actually look at you clearly and still decide to leave. Being needed feels safer than being chosen—until the morning they recover and have no use for the nurse."
+            ]
+          },
+          {
+            kind: "poem",
+            key: "washing-plates-for-ghosts",
+            tag: "washing plates for ghosts",
+            ghost: "Tonight the tap runs cold over my wrists as I stand here washing plates for ghosts.",
+            body: "Look at the table I set\nfor people who swore they were only stepping out\nfor a minute.\n\nI gave them the chair near the heater,\nthe last of my patience,\nthe quietest hours of my twenties.\nTonight the tap runs cold over my wrists\nas I stand here washing plates for ghosts—\nangry at them for leaving,\nangrier at myself for still setting four places."
+          },
+          {
+            kind: "poem",
+            key: "borrowed-warmth",
+            tag: "borrowed warmth",
+            ghost: "Spend all November talking someone down from a ledge.",
+            body: "It takes a strange kind of composure\nto spend all November talking someone\ndown from a ledge,\nonly to watch them carry that steady pulse\ninto a stranger's kitchen by March\nwithout a single glance over their shoulder."
+          },
+          {
+            kind: "prose",
+            key: "the-quiet-test",
+            heading: "The Quiet Test",
+            paragraphs: [
+              "One week I stopped messaging first. Not out of strategy—I was simply too tired to carry both ends of every corridor. Seven days went by. Then fourteen. Nobody knocked. Nobody asked why the house had gone dark.",
+              "That was the week I stopped calling myself loyal and started seeing how much of my life had been held together solely by my own refusal to let go."
+            ]
+          }
+        ]
+      },
+      {
+        id: "part-3",
+        roman: "Part III",
+        title: "The Fault in the Glass",
+        subtitle: "the midnight cross-examination when silence starts sounding like a verdict",
+        sketch: sketches.partThreeMirror,
+        entries: [
+          {
+            kind: "poem",
+            key: "2-14-am-cross-examination",
+            tag: "2:14 a.m. cross-examination",
+            ghost: "I lean both palms against the porcelain sink and inspect my face like a faulty receipt.",
+            body: "The bathroom bulb hums louder after two.\nI lean both palms against the porcelain sink\nand inspect my face like a faulty receipt—\nlooking for the small print I missed.\n\nToo eager? Too quiet? Too easy to read?\nWhen enough people leave a coat behind\nand never come back for it,\nyou begin to wonder what smells wrong\nabout the closet."
+          },
+          {
+            kind: "poem",
+            key: "easy-to-carry-easier-to-drop",
+            tag: "easy to carry, easier to drop",
+            ghost: "Nothing humbles you faster than realizing abundance can look cheap.",
+            body: "I have watched people cross entire cities\nfor someone who barely opened the latch,\nwhile I stood with the porch light on,\nkeys already in the lock,\nwatching footsteps slow outside my gate\nand then continue down the road.\n\nNothing humbles you faster\nthan realizing abundance can look cheap."
+          },
+          {
+            kind: "prose",
+            key: "the-case-against-myself",
+            heading: "The Case Against Myself",
+            paragraphs: [
+              "Past midnight, pride runs out of ammunition and the mind turns prosecutor. You replay every harmless sentence from six months ago, looking for the exact syllable that made them lose interest. Did I care too visibly? Did I forgive so fast that my forgiveness lost its weight?",
+              "It is strangely comforting to convict yourself—because if the flaw is inside your own ribs, at least you can pretend there is something left to fix."
+            ]
+          },
+          {
+            kind: "poem",
+            key: "what-i-actually-wanted",
+            tag: "what I actually wanted",
+            ghost: "I only wanted someone who noticed when my voice went flat on a Thursday evening.",
+            body: "I never asked for grand speeches\nor vows shouted over rain.\n\nI only wanted someone who noticed\nwhen my voice went flat on a Thursday evening,\nsomeone who did not treat my steadiness\nas permission to neglect me."
+          },
+          {
+            kind: "prose",
+            key: "no-witness",
+            heading: "No Witness",
+            paragraphs: [
+              "The sharpest ache is not betrayal; betrayal at least has a villain and a loud door. The sharpest ache is simply being forgotten while you are still standing in the room.",
+              "You learn to fold your own hands steady on the edge of the bed because there is no name in your contacts that wouldn't sound startled to hear you crying."
+            ]
+          }
+        ]
+      },
+      {
+        id: "part-4",
+        roman: "Part IV",
+        title: "Leaving the Table",
+        subtitle: "putting down the ledger without letting the silence turn you cruel",
+        sketch: sketches.partFourDoorway,
+        entries: [
+          {
+            kind: "poem",
+            key: "turning-off-the-porch-light",
+            tag: "turning off the porch light",
+            ghost: "I locked the front bolt once, checked the stove, and turned the porch switch down to dark.",
+            body: "Tonight I did not wait up\nfor a footstep that never belonged to this street.\nI locked the front bolt once,\nchecked the stove,\nand turned the porch switch down to dark.\n\nIt did not feel like victory.\nIt felt like a small, overdue truce\nwith my own tired eyes."
+          },
+          {
+            kind: "poem",
+            key: "without-bitterness",
+            tag: "without bitterness",
+            ghost: "Hardening is the laziest revenge.",
+            body: "Hardening is the laziest revenge.\nAnyone can lock every shutter\nand call their fear wisdom.\n\nThe harder discipline is keeping your hands clean,\nleaving the bad bargain on the table,\nand refusing to punish the next honest stranger\nfor the debts of people who already left."
+          },
+          {
+            kind: "prose",
+            key: "what-belonged-to-me",
+            heading: "What Belonged to Me",
+            paragraphs: [
+              "For a long time I resented every hour of care I gave to the wrong hands, as if kindness wasted on an ungrateful person turned rotten in hindsight. Tonight I see it differently. The patience was mine. The decency was mine. Their inability to value it says everything about their appetite and nothing about the bread.",
+              "I am still not going to starve myself to feed them again—but I refuse to be ashamed of having been whole."
+            ]
+          },
+          {
+            kind: "poem",
+            key: "a-smaller-room",
+            tag: "a smaller room",
+            ghost: "For the first time in years, the silence does not sound like punishment.",
+            body: "I am learning to sit inside a quiet room\nwithout scanning the hallway for rescue.\nOne cup on the saucer.\nOne chair pushed neatly under the wood.\n\nFor the first time in years,\nthe silence does not sound like punishment—\nit sounds like space I finally own."
+          },
+          {
+            kind: "prose",
+            key: "before-you-close-the-cover",
+            heading: "Before You Close the Cover",
+            paragraphs: [
+              "If you recognize yourself in these pages, do not mistake endurance for destiny. You were not put here to be everyone's emergency exit while your own house burns quietly at the edge of town.",
+              "Keep your tenderness—just stop handing the keys to people who only visit when the weather turns bad. Close the ledger. Leave the table. Let the next person who wants a seat actually pull out a chair."
+            ]
+          }
+        ]
+      }
+    ];
+
+    /* 5 Standout Excerpts Dynamically Linked to Exact Built Pages in Parts I–IV */
+    const MARGIN_HIGHLIGHTS = [
+      {
+        pieceKey: "drafts-folder",
+        part: "Part I",
+        text: "By 1:47 I cut it down to \"hope you reached safely.\" By 1:48 I closed the screen and called my cowardice restraint."
+      },
+      {
+        pieceKey: "between-trains",
+        part: "Part II",
+        text: "I thought if I kept the lamp lit long enough, you'd forget this was only a stop between trains."
+      },
+      {
+        pieceKey: "the-vanity-of-being-the-healer",
+        part: "Part II",
+        text: "Being needed feels safer than being chosen—until the morning they recover and have no use for the nurse."
+      },
+      {
+        pieceKey: "2-14-am-cross-examination",
+        part: "Part III",
+        text: "When enough people leave a coat behind and never come back for it, you begin to wonder what smells wrong about the closet."
+      },
+      {
+        pieceKey: "a-smaller-room",
+        part: "Part IV",
+        text: "For the first time in years, the silence does not sound like punishment—it sounds like space I finally own."
+      }
+    ];
+
+    /* Dynamic Pagination Registry Populated Automatically During Book Build */
+    let bookStats = {
+      chapterStartPages: {},
+      chapterRanges: [],
+      piecePages: {},
+      authorsNotePage: 0,
+      quotesIndexPage: 0,
+      aboutAuthorPage: 0,
+      interiorPageCount: 40,
+      signatureCount: 10,
+      spineInches: "0.12"
+    };
+
+    /* =========================================================================
+       7. Assemble Physical Book with Automatic Recto Alignment & Dynamic Indexing
+       ========================================================================= */
+    function buildBookPages() {
+      const formalTitle = bookMeta.displayTitle;
+      const edParts = bookMeta.editionLabel.split(/[•|]/).map(s => s.trim()).filter(Boolean);
+      const titleMarkTop = edParts[0] || "Private Written Title";
+      const titleMarkSub = edParts.length > 1
+        ? `${edParts.slice(1).join(" • ")} • 2026`
+        : `${resolveBookToken()} • 2026`;
+
+      // Reset dynamic page registry
+      bookStats = {
+        chapterStartPages: {},
+        chapterRanges: [],
+        piecePages: {},
+        authorsNotePage: 0,
+        quotesIndexPage: 0,
+        aboutAuthorPage: 0,
+        interiorPageCount: 0,
+        signatureCount: 0,
+        spineInches: "0.12"
+      };
+
+      /* --- PASS 1: Build Body Chapters & Back Matter to Resolve Exact Page Numbers --- */
+      const bodyAndBackPages = [];
+      let pageNum = 1;
+
+      // Helper: Insert a quiet blank verso page whenever a recto-only opener
+      // (Part Opener or Closing Note) would otherwise fall on a verso (even page).
+      function ensureRecto(blankId) {
+        if (pageNum % 2 === 0) {
+          bodyAndBackPages.push({
+            id: blankId,
+            type: "interior",
+            side: "verso",
+            label: "Pause",
+            render: () => `<div class="page-inner verso-gutter"></div>`
+          });
+          pageNum++;
+        }
+      }
+
+      CHAPTERS.forEach((ch) => {
+        ensureRecto(`blank-before-${ch.id}`);
+        const startPage = pageNum;
+        bookStats.chapterStartPages[ch.id] = startPage;
+
+        // Chapter Opener (Always Recto / Odd, Running Header Suppressed)
+        bodyAndBackPages.push(
+          partOpenerPage(ch.id, ch.roman, ch.title, ch.subtitle, ch.sketch, pageNum)
+        );
+        pageNum++;
+
+        // Chapter Entries (Poems & Prose)
+        ch.entries.forEach((entry) => {
+          const isRecto = pageNum % 2 === 1;
+          const runningHead = isRecto ? ch.title : formalTitle;
+          const piecePageId = `piece-${entry.key}`;
+          bookStats.piecePages[entry.key] = { pageNum, pageId: piecePageId };
+
+          if (entry.kind === "poem") {
+            bodyAndBackPages.push(
+              poemPage(piecePageId, entry.body, entry.tag, pageNum, runningHead, isRecto, entry.ghost)
+            );
+          } else if (entry.kind === "prose") {
+            bodyAndBackPages.push(
+              prosePage(piecePageId, entry.heading, entry.paragraphs, pageNum, runningHead, isRecto)
+            );
+          }
+          pageNum++;
+        });
+
+        bookStats.chapterRanges.push({
+          id: ch.id,
+          start: startPage,
+          end: pageNum - 1
+        });
+      });
+
+      // Closing Note ("A Quiet Note to the Reader") — Always Recto (Odd / Right Page)
+      ensureRecto("blank-before-authors-note");
+      bookStats.authorsNotePage = pageNum;
+      bodyAndBackPages.push({
+        id: "authors-note",
+        type: "interior",
+        side: "recto",
+        label: `Page ${pageNum}`,
+        render: () => `
+          <div class="page-inner recto-gutter">
+            <div class="prose-wrap">
+              <h3 class="prose-heading">A Quiet Note to the Reader</h3>
+              <div class="prose-text has-dropcap">
+                <p>This second volume was written without armor and without excuses&mdash;for anyone tired of keeping score in quiet rooms, and finally ready to come home to themselves.</p>
+                <p>You do not have to harden your heart to protect it. Put down the unrequested ledger, turn off the porch light at a reasonable hour, and save your steadiness for hands that actually know how to hold what they are given.</p>
+              </div>
+              <div class="prose-sign">&mdash; ${escapeHTML(bookMeta.authorShort)}</div>
+            </div>
+            <div class="page-footer-num">${bookStats.authorsNotePage}</div>
+          </div>`
+      });
+      pageNum++;
+
+      // Clickable "Lines Kept in the Margin" Index (Verso / Even Page)
+      bookStats.quotesIndexPage = pageNum;
+      bodyAndBackPages.push({
+        id: "quotes-index",
+        type: "interior",
+        side: "verso",
+        label: `Page ${pageNum}`,
+        render: () => {
+          const rows = MARGIN_HIGHLIGHTS.map(q => {
+            const loc = bookStats.piecePages[q.pieceKey] || { pageNum: 1, pageId: "part-1" };
+            return `
+              <li class="margin-item" onclick="goToPageId('${loc.pageId}')">
+                <span class="margin-line">&ldquo;${escapeHTML(q.text)}&rdquo;</span>
+                <span class="margin-meta"><span>${q.part}</span><span>p. ${loc.pageNum}</span></span>
+              </li>`;
+          }).join("");
+
+          return `
+            <div class="page-inner verso-gutter">
+              <div class="margin-index-wrap">
+                <h3 class="margin-heading">Lines Kept in the Margin</h3>
+                <ul class="margin-list">${rows}</ul>
+              </div>
+              <div class="page-footer-num">${bookStats.quotesIndexPage}</div>
+            </div>`;
+        }
+      });
+      pageNum++;
+
+      // About Irish (Recto / Odd Page)
+      bookStats.aboutAuthorPage = pageNum;
+      bodyAndBackPages.push({
+        id: "about-author",
+        type: "interior",
+        side: "recto",
+        label: `Page ${pageNum}`,
+        render: () => `
+          <div class="page-inner recto-gutter">
+            <div class="about-wrap">
+              <div class="about-monogram">${escapeHTML(bookMeta.authorShort.charAt(0).toUpperCase())}</div>
+              <h3 class="about-heading">About ${escapeHTML(bookMeta.authorShort)}</h3>
+              <div class="about-text">
+                <p><strong>${escapeHTML(bookMeta.authorShort)}</strong> writes spare, unsentimental verse and midnight prose examining one-sided devotion, the quiet ego of over-giving, and the ordinary rooms where heartbreak actually lives.</p>
+                <p><em>${escapeHTML(formalTitle)}</em> is the second private written volume&mdash;authored without commercial imprints or easy consolation, kept for readers ready for clarity over comfort.</p>
+              </div>
+            </div>
+            <div class="page-footer-num">${bookStats.aboutAuthorPage}</div>
+          </div>`
+      });
+      pageNum++;
+
+      // Exact Interior Page Count (8 Front Matter + Body/Back including Verso Colophon)
+      const frontMatterCount = 8;
+      bookStats.interiorPageCount = frontMatterCount + bodyAndBackPages.length + 1;
+      bookStats.signatureCount = Math.ceil(bookStats.interiorPageCount / 4);
+      bookStats.spineInches = (bookStats.interiorPageCount * 0.0025 + 0.02).toFixed(2);
+
+      // Private Archival Colophon (Verso, Unnumbered — faces Inside Back Endpaper)
+      bodyAndBackPages.push({
+        id: "colophon",
+        type: "interior",
+        side: "verso",
+        label: "Colophon",
+        render: () => `
+          <div class="page-inner verso-gutter">
+            <div class="colophon-wrap">
+              <div class="colophon-sprig" style="margin-bottom:calc(var(--page-h) * 0.022);opacity:0.74;">${sketches.tinyArchMotif}</div>
+              This is a Private Written Edition,<br/>
+              authored without commercial imprint for quiet reading and private keeping.<br/><br/>
+              Typeset in EB Garamond, Cormorant Garamond &amp; Cinzel,<br/>
+              across ${bookStats.interiorPageCount} archival pages in 5 &times; 8 in trade book format.<br/><br/>
+              ${escapeHTML(bookMeta.editionLabel)} &bull; 2026
+            </div>
+          </div>`
+      });
+
+      /* --- PASS 2: Assemble Complete Physical Book Array --- */
+      const list = [];
+
+      // 0: Front Cover (Alone)
+      list.push({
+        id: "front-cover",
+        type: "cover-front",
+        label: "Front Cover",
+        render: (uid = "main") => renderFrontCoverInner(uid)
+      });
+
+      // 1 (Left / Verso): Inside Front Cover Endpaper
+      list.push({
+        id: "inside-front",
+        type: "endpaper",
+        label: "Inside Cover",
+        render: () => `<div class="endpaper-inner"></div>`
+      });
+
+      // 2 (Right / Recto): Half Title
+      list.push({
+        id: "half-title",
+        type: "interior",
+        side: "recto",
+        label: "Half Title",
+        render: () => `
+          <div class="page-inner recto-gutter">
+            <div class="half-title-wrap">
+              <div class="half-title-text">${escapeHTML(formalTitle)}</div>
+            </div>
+          </div>`
+      });
+
+      // 3 (Left / Verso): Frontispiece Minimalist Ink Lamp/Doorway Ornament
+      list.push({
+        id: "frontispiece",
+        type: "interior",
+        side: "verso",
+        label: "Frontispiece",
+        render: () => `
+          <div class="page-inner verso-gutter" style="justify-content:center;align-items:center;opacity:0.58;">
+            <div class="full-title-sprig">${sketches.tinyArchMotif}</div>
+          </div>`
+      });
+
+      // 4 (Right / Recto): Full Title Page (Strictly Private Written, Zero Publisher)
+      list.push({
+        id: "title-page",
+        type: "interior",
+        side: "recto",
+        label: "Title Page",
+        render: () => `
+          <div class="page-inner recto-gutter">
+            <div class="full-title-wrap">
+              <div>
+                <div class="full-title-main">${escapeHTML(formalTitle)}</div>
+                <div class="full-title-sub">${escapeHTML(bookMeta.subtitle)}</div>
+              </div>
+              <div class="full-title-sprig" style="opacity:0.86;">${sketches.tinyArchMotif}</div>
+              <div class="full-title-author">${escapeHTML(bookMeta.authorCredit)}</div>
+              <div class="full-title-manuscript-mark">
+                <span class="ms-mark-top">${escapeHTML(titleMarkTop)}</span>
+                <span class="ms-mark-sub">${escapeHTML(titleMarkSub)}</span>
+              </div>
+            </div>
+          </div>`
+      });
+
+      // 5 (Left / Verso): Private Written Notice (No Publisher, No ISBN)
+      list.push({
+        id: "copyright",
+        type: "interior",
+        side: "verso",
+        label: "Private Notice",
+        render: () => `
+          <div class="page-inner verso-gutter">
+            <div class="copyright-wrap">
+              <div class="copyright-kicker">Private Written Notice</div>
+              <p class="copyright-title">${escapeHTML(formalTitle)}</p>
+              <p>Written &copy; 2026 by ${escapeHTML(bookMeta.authorShort)}. All words privately authored and preserved.</p>
+              <p>Second private volume &mdash; unpublished personal manuscript. Crafted for quiet reading without commercial imprints or publisher marks.</p>
+              <p>Typeset in EB Garamond, Cormorant Garamond &amp; Cinzel &bull; 5 &times; 8 in Book Format (${bookStats.interiorPageCount} interior pages).</p>
+            </div>
+          </div>`
+      });
+
+      // 6 (Right / Recto): Dedication
+      list.push({
+        id: "dedication",
+        type: "interior",
+        side: "recto",
+        label: "Dedication",
+        render: () => `
+          <div class="page-inner recto-gutter">
+            <div class="dedication-wrap">
+              <div class="dedication-text">${escapeHTML(bookMeta.dedication).replace(/\n/g, "<br/>")}</div>
+            </div>
+          </div>`
+      });
+
+      // 7 (Left / Verso): Intentional Blank Verso so Contents Lands on Recto
+      list.push({
+        id: "blank-pre-toc",
+        type: "interior",
+        side: "verso",
+        label: "Blank",
+        render: () => `<div class="page-inner verso-gutter"></div>`
+      });
+
+      // 8 (Right / Recto): Interactive Table of Contents (Dynamic Page Numbers)
+      list.push({
+        id: "contents",
+        type: "interior",
+        side: "recto",
+        label: "Contents",
+        render: () => {
+          const itemsHTML = CHAPTERS.map(ch => `
+            <li class="toc-item" onclick="goToPageId('${ch.id}')">
+              <div>
+                <span class="toc-part-num">${ch.roman}</span>
+                <span class="toc-part-title">${escapeHTML(ch.title)}</span>
+              </div>
+              <span class="toc-dots"></span>
+              <span class="toc-pg">${bookStats.chapterStartPages[ch.id]}</span>
+            </li>
+          `).join("");
+
+          return `
+            <div class="page-inner recto-gutter">
+              <div class="toc-wrap">
+                <h2 class="toc-heading">Contents</h2>
+                <ul class="toc-list">
+                  ${itemsHTML}
+                  <li class="toc-item" onclick="goToPageId('authors-note')">
+                    <div>
+                      <span class="toc-part-num">Closing</span>
+                      <span class="toc-part-title">A Quiet Note to the Reader</span>
+                    </div>
+                    <span class="toc-dots"></span>
+                    <span class="toc-pg">${bookStats.authorsNotePage}</span>
+                  </li>
+                  <li class="toc-item" onclick="goToPageId('quotes-index')">
+                    <div>
+                      <span class="toc-part-num">Index</span>
+                      <span class="toc-part-title">Lines Kept in the Margin</span>
+                    </div>
+                    <span class="toc-dots"></span>
+                    <span class="toc-pg">${bookStats.quotesIndexPage}</span>
+                  </li>
+                  <li class="toc-item" onclick="goToPageId('about-author')">
+                    <div>
+                      <span class="toc-part-num">Author</span>
+                      <span class="toc-part-title">About ${escapeHTML(bookMeta.authorShort)}</span>
+                    </div>
+                    <span class="toc-dots"></span>
+                    <span class="toc-pg">${bookStats.aboutAuthorPage}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>`;
+        }
+      });
+
+      // 9 (Left / Verso): Epigraph Facing Part I (Page 1)
+      list.push({
+        id: "epigraph",
+        type: "interior",
+        side: "verso",
+        label: "Epigraph",
+        render: () => `
+          <div class="page-inner verso-gutter">
+            <div class="dedication-wrap">
+              <div class="dedication-text">
+                &ldquo;This is not a monument to how badly they treated me.<br/>
+                It is an honest account of how long I stayed<br/>
+                after the door was already open.&rdquo;
+              </div>
+              <div class="epigraph-author">&mdash; ${escapeHTML(bookMeta.authorShort)}</div>
+            </div>
+          </div>`
+      });
+
+      // Append all 4 Movements + Back Matter
+      bodyAndBackPages.forEach(p => list.push(p));
+
+      // Inside Back Cover Endpaper (Right / Recto facing Verso Colophon)
+      list.push({
+        id: "inside-back",
+        type: "endpaper",
+        label: "Inside Back Cover",
+        render: () => `<div class="endpaper-inner"></div>`
+      });
+
+      // Final Slot: Back Cover (Alone)
+      list.push({
+        id: "back-cover",
+        type: "cover-back",
+        label: "Back Cover",
+        render: (uid = "main") => renderBackCoverInner(uid)
+      });
+
+      return list;
+    }
+
+    /* =========================================================================
+       8. Editorial Interior Page Template Builders
+       ========================================================================= */
+    function partOpenerPage(id, roman, title, sub, sketch, pageNum) {
+      return {
+        id,
+        type: "interior",
+        side: "recto",
+        chapterId: id,
+        pageNum,
+        label: `Page ${pageNum}`,
+        render: () => `
+          <div class="page-inner recto-gutter">
+            <div class="part-opener-wrap">
+              <div class="part-sketch">${sketch}</div>
+              <div class="part-roman">${roman}</div>
+              <h2 class="part-name">${escapeHTML(title)}</h2>
+              <p class="part-sub">${escapeHTML(sub)}</p>
+            </div>
+            <div class="page-footer-num">${pageNum}</div>
+          </div>`
+      };
+    }
+
+    function poemPage(id, body, tag, pageNum, runningHead, isRecto, ghostText = "") {
+      const gutterCls = isRecto ? "recto-gutter" : "verso-gutter";
+      return {
+        id,
+        type: "interior",
+        side: isRecto ? "recto" : "verso",
+        pageNum,
+        label: `Page ${pageNum}`,
+        render: () => `
+          <div class="page-inner ${gutterCls}">
+            ${ghostText ? `<div class="ghost-bleed" aria-hidden="true">${escapeHTML(ghostText)}</div>` : ""}
+            <div class="running-header">${escapeHTML(runningHead)}</div>
+            <div class="poem-wrap">
+              <div class="poem-body">${escapeHTML(body)}</div>
+              <div class="poem-title-tag">&mdash; ${escapeHTML(tag)}</div>
+            </div>
+            <div class="page-footer-num">${pageNum}</div>
+          </div>`
+      };
+    }
+
+    function prosePage(id, heading, paragraphs, pageNum, runningHead, isRecto) {
+      const gutterCls = isRecto ? "recto-gutter" : "verso-gutter";
+      const pHtml = paragraphs.map(p => `<p>${escapeHTML(p)}</p>`).join("");
+      return {
+        id,
+        type: "interior",
+        side: isRecto ? "recto" : "verso",
+        pageNum,
+        label: `Page ${pageNum}`,
+        render: () => `
+          <div class="page-inner ${gutterCls}">
+            <div class="running-header">${escapeHTML(runningHead)}</div>
+            <div class="prose-wrap">
+              <h3 class="prose-heading">${escapeHTML(heading)}</h3>
+              <div class="prose-text has-dropcap">${pHtml}</div>
+              <div class="poem-tiny-ornament">${sketches.tinyArchMotif}</div>
+            </div>
+            <div class="page-footer-num">${pageNum}</div>
+          </div>`
+      };
+    }
+
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    /* =========================================================================
+       9. Interactive Reader Engine (Single-Page Mobile + 2-Page Desktop Spread)
+       ========================================================================= */
+    let pages = buildBookPages();
+    let isSpreadMode = window.innerWidth > 900;
+    let currentIndex = 0;
+    let currentStep = 0;
+    let isAnimating = false;
+
+    function buildSteps() {
+      if (!isSpreadMode) return pages.map((_, idx) => [idx]);
+      const steps = [[0]]; // Front cover alone
+      for (let i = 1; i < pages.length - 1; i += 2) {
+        steps.push(i + 1 < pages.length - 1 ? [i, i + 1] : [i]);
+      }
+      steps.push([pages.length - 1]); // Back cover alone
+      return steps;
+    }
+
+    function findStepForPage(pageIdx) {
+      const idx = buildSteps().findIndex(s => s.includes(pageIdx));
+      return idx >= 0 ? idx : 0;
+    }
+
+    function renderBook(direction = null) {
+      try {
+        const steps = buildSteps();
+        currentStep = Math.max(0, Math.min(currentStep, steps.length - 1));
+        const stage = document.getElementById("bookStage");
+
+        const applyRender = () => {
+          const pair = steps[currentStep];
+          currentIndex = pair[0];
+          const isPairSpread = pair.length === 2;
+          stage.classList.toggle("is-spread", isPairSpread);
+
+          let html = "";
+          if (!isPairSpread) {
+            const p = pages[pair[0]];
+            let cls = "book-page single-page";
+            if (p.type === "cover-front") cls = "book-page cover-front";
+            if (p.type === "cover-back") cls = "book-page cover-back";
+            html = `
+              <div class="${cls}">
+                ${p.render("main")}
+                <div class="flip-zone left" onclick="prevStep()" title="Previous page"></div>
+                <div class="flip-zone right" onclick="nextStep()" title="Next page"></div>
+              </div>`;
+          } else {
+            const leftP = pages[pair[0]];
+            const rightP = pages[pair[1]];
+            html = `
+              <div class="book-page spread-left">
+                ${leftP.render("mainL")}
+                <div class="flip-zone left" onclick="prevStep()" title="Previous spread"></div>
+              </div>
+              <div class="book-page spread-right">
+                ${rightP.render("mainR")}
+                <div class="flip-zone right" onclick="nextStep()" title="Next spread"></div>
+              </div>`;
+          }
+          stage.innerHTML = html;
+          updateUIState(steps, pair);
+        };
+
+        if (direction) {
+          if (isAnimating) return;
+          isAnimating = true;
+          stage.classList.add(direction === "next" ? "turning-next" : "turning-prev");
+          setTimeout(() => {
+            applyRender();
+            stage.classList.remove("turning-next", "turning-prev");
+            isAnimating = false;
+          }, 160);
+        } else {
+          applyRender();
+        }
+      } catch (err) {
+        console.error("Failed to render book stage:", err);
+      }
+    }
+
+    function resolveActiveSectionIds(pair) {
+      const ids = pair.map(i => pages[i].id);
+      pair.forEach(i => {
+        const p = pages[i];
+        if (p && typeof p.pageNum === "number") {
+          const range = bookStats.chapterRanges.find(
+            r => p.pageNum >= r.start && p.pageNum <= r.end
+          );
+          if (range && !ids.includes(range.id)) ids.push(range.id);
+        }
+      });
+      return ids;
+    }
+
+    function updateUIState(steps, pair) {
+      document.getElementById("prevBtn").disabled = currentStep === 0;
+      document.getElementById("nextBtn").disabled = currentStep === steps.length - 1;
+      document.getElementById("pageIndicator").textContent =
+        pair.length === 1
+          ? pages[pair[0]].label
+          : `${pages[pair[0]].label}  ·  ${pages[pair[1]].label}`;
+
+      const ids = resolveActiveSectionIds(pair);
+      document.getElementById("btnFrontCover").classList.toggle("active", ids.includes("front-cover"));
+      document.getElementById("btnContents").classList.toggle("active", ids.includes("contents"));
+      document.getElementById("btnBackCover").classList.toggle("active", ids.includes("back-cover"));
+      document.getElementById("btnViewMode").textContent = isSpreadMode ? "Single Page" : "Spread View";
+      renderChapterDrawer(ids);
+    }
+
+    function nextStep() {
+      const steps = buildSteps();
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderBook("next");
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        renderBook("prev");
+      }
+    }
+
+    function goToPageId(id) {
+      const pageIdx = pages.findIndex(p => p.id === id);
+      if (pageIdx < 0) return;
+      const targetStep = findStepForPage(pageIdx);
+      const dir = targetStep > currentStep ? "next" : (targetStep < currentStep ? "prev" : null);
+      currentStep = targetStep;
+      closeChapterDrawer();
+      renderBook(dir);
+    }
+
+    function toggleViewMode() {
+      if (window.innerWidth <= 900) return;
+      isSpreadMode = !isSpreadMode;
+      currentStep = findStepForPage(currentIndex);
+      renderBook();
+    }
+
+    function toggleNightMode() {
+      document.body.classList.toggle("night-mode");
+      document.getElementById("btnNightMode").classList.toggle(
+        "active",
+        document.body.classList.contains("night-mode")
+      );
+    }
+
+    /* =========================================================================
+       10. Slide-Out Chapter & Section Index Drawer (Dynamically Indexed)
+       ========================================================================= */
+    function renderChapterDrawer(activeIds = []) {
+      const body = document.getElementById("drawerBody");
+      const chapterItems = CHAPTERS.map(ch => `
+        <button class="drawer-item ${activeIds.includes(ch.id) ? "active" : ""}" onclick="goToPageId('${ch.id}')">
+          <span>
+            <span class="drawer-item-title">${ch.roman}: ${escapeHTML(ch.title)}</span>
+            <span class="drawer-item-sub">${escapeHTML(ch.subtitle)}</span>
+          </span>
+          <span class="drawer-item-pg">p. ${bookStats.chapterStartPages[ch.id]}</span>
+        </button>
+      `).join("");
+
+      body.innerHTML = `
+        <div class="drawer-group-label">Front Matter</div>
+        <button class="drawer-item ${activeIds.includes("front-cover") ? "active" : ""}" onclick="goToPageId('front-cover')">
+          <span class="drawer-item-title">Front Cover</span>
+          <span class="drawer-item-pg">Cover</span>
+        </button>
+        <button class="drawer-item ${activeIds.includes("title-page") ? "active" : ""}" onclick="goToPageId('title-page')">
+          <span class="drawer-item-title">Title &amp; Private Notice</span>
+          <span class="drawer-item-pg">iii</span>
+        </button>
+        <button class="drawer-item ${activeIds.includes("contents") ? "active" : ""}" onclick="goToPageId('contents')">
+          <span class="drawer-item-title">Table of Contents</span>
+          <span class="drawer-item-pg">vii</span>
+        </button>
+
+        <div class="drawer-group-label">Four Movements (22 Pieces)</div>
+        ${chapterItems}
+
+        <div class="drawer-group-label">Closing &amp; Keepsake Pages</div>
+        <button class="drawer-item ${activeIds.includes("authors-note") ? "active" : ""}" onclick="goToPageId('authors-note')">
+          <span class="drawer-item-title">A Quiet Note to the Reader</span>
+          <span class="drawer-item-pg">p. ${bookStats.authorsNotePage}</span>
+        </button>
+        <button class="drawer-item ${activeIds.includes("quotes-index") ? "active" : ""}" onclick="goToPageId('quotes-index')">
+          <span class="drawer-item-title">Lines Kept in the Margin</span>
+          <span class="drawer-item-pg">p. ${bookStats.quotesIndexPage}</span>
+        </button>
+        <button class="drawer-item ${activeIds.includes("about-author") ? "active" : ""}" onclick="goToPageId('about-author')">
+          <span class="drawer-item-title">About ${escapeHTML(bookMeta.authorShort)} &amp; Colophon</span>
+          <span class="drawer-item-pg">p. ${bookStats.aboutAuthorPage}</span>
+        </button>
+        <button class="drawer-item ${activeIds.includes("back-cover") ? "active" : ""}" onclick="goToPageId('back-cover')">
+          <span class="drawer-item-title">Back Cover &amp; Private Seal</span>
+          <span class="drawer-item-pg">Back</span>
+        </button>
+        <button class="drawer-item" onclick="closeChapterDrawer(); openFullWrap();">
+          <span class="drawer-item-title">Full-Wrap Cover Inspector</span>
+          <span class="drawer-item-pg">Wrap</span>
+        </button>
+      `;
+    }
+
+    function toggleChapterDrawer() {
+      const drawer = document.getElementById("chapterDrawer");
+      const open = !drawer.classList.contains("open");
+      drawer.classList.toggle("open", open);
+      document.getElementById("drawerBackdrop").classList.toggle("open", open);
+      document.getElementById("btnChapters").classList.toggle("active", open);
+    }
+
+    function closeChapterDrawer() {
+      document.getElementById("chapterDrawer").classList.remove("open");
+      document.getElementById("drawerBackdrop").classList.remove("open");
+      document.getElementById("btnChapters").classList.remove("active");
+    }
+
+    /* =========================================================================
+       11. Full-Wrap Private Book Cover Inspector (Back + Spine + Front + Bleed)
+       ========================================================================= */
+    function renderFullWrap() {
+      const specsEl = document.getElementById("wrapSpecsLine");
+      const totalWrapWidth = (10 + parseFloat(bookStats.spineInches) + 0.25).toFixed(2);
+      specsEl.innerHTML = `5.00&Prime; &times; 8.00&Prime; Trim &bull; ${bookStats.interiorPageCount} Interior Pages (${bookStats.signatureCount} &times; 4p Signatures) &bull; ${bookStats.spineInches}&Prime; Spine &bull; ${totalWrapWidth}&Prime; &times; 8.25&Prime; w/ 0.125&Prime; Bleed`;
+
+      const sheet = document.getElementById("fullWrapSheet");
+      sheet.innerHTML = `
+        <div class="wrap-panel-back">
+          ${renderBackCoverInner("wrap")}
+        </div>
+        <div class="wrap-panel-spine">
+          <div class="spine-title">${escapeHTML(bookMeta.displayTitle)}</div>
+          <div class="spine-author">${escapeHTML(bookMeta.authorShort.toUpperCase())}</div>
+          <div class="spine-sprig">${sketches.spineArchIcon}</div>
+        </div>
+        <div class="wrap-panel-front">
+          ${renderFrontCoverInner("wrap")}
+        </div>
+        <div class="bleed-guides-overlay">
+          <div class="guide-trim-box"></div>
+          <div class="guide-safe-left"></div>
+          <div class="guide-safe-right"></div>
+          <div class="guide-spine-fold"></div>
+          <span class="guide-badge trim">0.125&Prime; BLEED / TRIM</span>
+          <span class="guide-badge safe">0.25&Prime; SAFE ZONE</span>
+          <span class="guide-badge spine">${bookStats.spineInches}&Prime; SPINE</span>
+        </div>
+      `;
+      toggleBleedOverlay();
+    }
+
+    function openFullWrap() {
+      renderFullWrap();
+      document.getElementById("fullWrapModal").classList.add("open");
+    }
+
+    function closeFullWrap() {
+      document.getElementById("fullWrapModal").classList.remove("open");
+    }
+
+    function toggleBleedOverlay() {
+      const checked = document.getElementById("toggleBleedGuides").checked;
+      document.getElementById("fullWrapSheet").classList.toggle("show-guides", checked);
+    }
+
+    /* =========================================================================
+       12. Live Customization Modal & 5x8 Print / Save as PDF Export
+       ========================================================================= */
+    function openPersonalize() {
+      document.getElementById("inputCoverTitle").value = bookMeta.coverTitleLines.join(" / ");
+      document.getElementById("inputPartLabel").value = bookMeta.partLabel;
+      document.getElementById("inputDisplayTitle").value = bookMeta.displayTitle;
+      document.getElementById("inputSubtitle").value = bookMeta.subtitle;
+      document.getElementById("inputAuthor").value = bookMeta.authorCredit;
+      document.getElementById("inputEditionLabel").value = bookMeta.editionLabel;
+      document.getElementById("inputDedication").value = bookMeta.dedication;
+      document.getElementById("personalizeModal").classList.add("open");
+    }
+
+    function closePersonalize() {
+      document.getElementById("personalizeModal").classList.remove("open");
+    }
+
+    function savePersonalize() {
+      try {
+        const lines = document.getElementById("inputCoverTitle").value
+          .split("/")
+          .map(s => s.trim())
+          .filter(Boolean);
+        bookMeta.coverTitleLines = lines.length ? lines : ["The Curse", "of the", "Unloved"];
+        bookMeta.partLabel = document.getElementById("inputPartLabel").value.trim() || "Part II";
+        bookMeta.displayTitle = document.getElementById("inputDisplayTitle").value.trim() || `${bookMeta.coverTitleLines.join(" ")}: ${bookMeta.partLabel}`;
+        bookMeta.subtitle = document.getElementById("inputSubtitle").value.trim() || bookMeta.subtitle;
+        bookMeta.authorCredit = document.getElementById("inputAuthor").value.trim() || "Written by Irish";
+        bookMeta.authorShort = bookMeta.authorCredit.replace(/^written\s+by\s+/i, "").trim() || "Irish";
+        bookMeta.editionLabel = document.getElementById("inputEditionLabel").value.trim() || "Private Written Title • Book II";
+        bookMeta.dedication = document.getElementById("inputDedication").value.trim() || bookMeta.dedication;
+
+        pages = buildBookPages();
+        document.title = `${bookMeta.displayTitle} — ${bookMeta.authorCredit}`;
+        closePersonalize();
+        renderBook();
+        if (document.getElementById("fullWrapModal").classList.contains("open")) {
+          renderFullWrap();
+        }
+      } catch (err) {
+        console.error("Failed to apply customization:", err);
+      }
+    }
+
+    function printRealBook() {
+      try {
+        const container = document.getElementById("printBookContainer");
+        container.innerHTML = pages.map((p, idx) => {
+          let cls = "book-page";
+          if (p.type === "cover-front") cls += " cover-front";
+          else if (p.type === "cover-back") cls += " cover-back";
+          return `<div class="${cls}">${p.render(`print_${idx}`)}</div>`;
+        }).join("");
+        window.print();
+      } catch (err) {
+        console.error("Print preparation failed:", err);
+      }
+    }
+
+    /* =========================================================================
+       13. Subtle Slow-Drifting Candlelit Gold Dust & Warm Ash Embers Canvas
+       ========================================================================= */
+    const emberCanvas = document.getElementById("emberCanvas");
+    const emberCtx = emberCanvas.getContext("2d");
+    let embersActive = true;
+    let moteList = [];
+    let ashList = [];
+    let cW = window.innerWidth;
+    let cH = window.innerHeight;
+
+    function resizeEmberCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cW = window.innerWidth;
+      cH = window.innerHeight;
+      emberCanvas.width = cW * dpr;
+      emberCanvas.height = cH * dpr;
+      emberCanvas.style.width = `${cW}px`;
+      emberCanvas.style.height = `${cH}px`;
+      emberCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function makeGoldMote(randomY = false) {
+      return {
+        x: Math.random() * cW,
+        y: randomY ? Math.random() * cH : cH + 14 + Math.random() * 50,
+        r: 0.85 + Math.random() * 1.85,
+        vy: -(0.11 + Math.random() * 0.22),
+        vx: -0.08 + Math.random() * 0.16,
+        swayAmp: 0.16 + Math.random() * 0.32,
+        swayFreq: 0.004 + Math.random() * 0.007,
+        phase: Math.random() * Math.PI * 2,
+        twinklePhase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.011 + Math.random() * 0.017,
+        baseAlpha: 0.18 + Math.random() * 0.30
+      };
+    }
+
+    function makeAshFleck(randomY = false) {
+      return {
+        x: Math.random() * cW,
+        y: randomY ? Math.random() * cH : -14 - Math.random() * 50,
+        w: 1.3 + Math.random() * 2.0,
+        h: 0.7 + Math.random() * 1.2,
+        vy: 0.13 + Math.random() * 0.20,
+        vx: -0.09 + Math.random() * 0.18,
+        rot: Math.random() * Math.PI * 2,
+        vRot: -0.008 + Math.random() * 0.016,
+        alpha: 0.11 + Math.random() * 0.16
+      };
+    }
+
+    function seedEmbers() {
+      moteList = [];
+      ashList = [];
+      for (let i = 0; i < 34; i++) moteList.push(makeGoldMote(true));
+      for (let i = 0; i < 15; i++) ashList.push(makeAshFleck(true));
+    }
+
+    function drawGoldMote(m) {
+      const isNight = document.body.classList.contains("night-mode");
+      const alpha = m.baseAlpha * (0.55 + 0.45 * Math.sin(m.twinklePhase)) * (isNight ? 1.22 : 0.82);
+      emberCtx.save();
+      emberCtx.globalAlpha = Math.min(alpha, 0.66);
+
+      const g = emberCtx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.r * 3.1);
+      g.addColorStop(0, isNight ? "rgba(255, 228, 174, 0.94)" : "rgba(205, 152, 78, 0.86)");
+      g.addColorStop(0.45, isNight ? "rgba(223, 180, 112, 0.42)" : "rgba(176, 126, 68, 0.32)");
+      g.addColorStop(1, "rgba(223, 180, 112, 0)");
+
+      emberCtx.fillStyle = g;
+      emberCtx.beginPath();
+      emberCtx.arc(m.x, m.y, m.r * 3.1, 0, Math.PI * 2);
+      emberCtx.fill();
+      emberCtx.restore();
+    }
+
+    function drawAshFleck(a) {
+      const isNight = document.body.classList.contains("night-mode");
+      emberCtx.save();
+      emberCtx.translate(a.x, a.y);
+      emberCtx.rotate(a.rot);
+      emberCtx.globalAlpha = a.alpha * (isNight ? 1.05 : 0.82);
+      emberCtx.fillStyle = isNight ? "#9e8884" : "#5e4a47";
+      emberCtx.beginPath();
+      emberCtx.ellipse(0, 0, a.w, a.h, 0, 0, Math.PI * 2);
+      emberCtx.fill();
+      emberCtx.restore();
+    }
+
+    function animateEmbers() {
+      emberCtx.clearRect(0, 0, cW, cH);
+
+      if (embersActive) {
+        for (let i = 0; i < moteList.length; i++) {
+          const m = moteList[i];
+          m.phase += m.swayFreq;
+          m.twinklePhase += m.twinkleSpeed;
+          m.x += m.vx + Math.sin(m.phase) * m.swayAmp;
+          m.y += m.vy;
+
+          if (m.y < -20 || m.x < -30 || m.x > cW + 30) {
+            moteList[i] = makeGoldMote(false);
+          }
+          drawGoldMote(m);
+        }
+
+        for (let i = 0; i < ashList.length; i++) {
+          const a = ashList[i];
+          a.x += a.vx;
+          a.y += a.vy;
+          a.rot += a.vRot;
+
+          if (a.y > cH + 20 || a.x < -30 || a.x > cW + 30) {
+            ashList[i] = makeAshFleck(false);
+          }
+          drawAshFleck(a);
+        }
+      }
+
+      requestAnimationFrame(animateEmbers);
+    }
+
+    function toggleEmbers() {
+      embersActive = !embersActive;
+      document.getElementById("btnEmbers").classList.toggle("active", embersActive);
+    }
+
+    /* =========================================================================
+       14. Keyboard, Touch Swipe, Resize & Window Load Initialization
+       ========================================================================= */
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closePersonalize();
+        closeFullWrap();
+        closeChapterDrawer();
+        return;
+      }
+      if (
+        document.getElementById("personalizeModal").classList.contains("open") ||
+        document.getElementById("fullWrapModal").classList.contains("open")
+      ) {
+        return;
+      }
+      if (e.key === "ArrowRight") nextStep();
+      if (e.key === "ArrowLeft") prevStep();
+    });
+
+    let touchStartX = 0;
+    const wrapper = document.getElementById("bookWrapper");
+    wrapper.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    wrapper.addEventListener("touchend", (e) => {
+      const diff = touchStartX - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 48) {
+        diff > 0 ? nextStep() : prevStep();
+      }
+    }, { passive: true });
+
+    window.addEventListener("resize", () => {
+      resizeEmberCanvas();
+      if (window.innerWidth <= 900 && isSpreadMode) {
+        isSpreadMode = false;
+        currentStep = findStepForPage(currentIndex);
+        renderBook();
+      }
+    });
+
+    window.onload = function () {
+      resizeEmberCanvas();
+      seedEmbers();
+      renderBook();
+      animateEmbers();
+    };
+  </script>
+</body>
+</html>
